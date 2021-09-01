@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>monthly_notifications</id>
+    <name>Monthly Notifications</name>
+    <summary>Monthly notifications alerting the user about their usage and giving them tips</summary>
+    <description>Reo.</description>
+    <version>23.0.0</version>
+    <licence>agpl</licence>
+    <author>Carl Schwan</author>
+    <namespace>MonthlyNotifications</namespace>
+    <category>social</category>
+    <bugs>https://github.com/nextcloud/monthly_notifications/issues</bugs>
+    <dependencies>
+        <nextcloud min-version="23" max-version="23" />
+    </dependencies>
+    <background-jobs>
+        <job>OCA\MonthlyNotifications\Jobs\SendNotifications</job>
+    </background-jobs>
+    <settings>
+        <personal>OCA\MonthlyNotifications\Settings\PersonalSettings</personal>
+    </settings>
+	<repair-steps>
+		<post-migration>
+			<step>OCA\MonthlyNotifications\Migration\InitDatabase</step>
+		</post-migration>
+	</repair-steps>
+</info>
