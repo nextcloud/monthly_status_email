@@ -44,7 +44,6 @@ class Version23000Date2021090112000001 extends SimpleMigrationStep {
 			$table->addColumn('id', 'integer', [
 				'autoincrement' => true,
 				'notnull' => true,
-				'unique' => true,
 			]);
 			$table->addColumn('user_id', 'string', [
 				'notnull' => true,
@@ -60,8 +59,8 @@ class Version23000Date2021090112000001 extends SimpleMigrationStep {
 			$table->addColumn('secret_token', 'string', [
 				'notnull' => true,
 				'default' => false,
-				'unique' => true,
 			]);
+			$table->addUniqueIndex(['user_id', 'secret_token']);
 
 			$table->setPrimaryKey(['id']);
 		}

@@ -6,9 +6,9 @@
 		</p>
 		<p>
 			<input id="send-notifications"
+				v-model="sendNotifications"
 				type="checkbox"
-				class="checkbox"
-				v-model="sendNotification">
+				class="checkbox">
 			<label for="send-notifications">{{ t('monthly_notifications', 'Send monthly summary') }}</label>
 		</p>
 	</div>
@@ -17,23 +17,24 @@
 <script>
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
+import { loadState } from '@nextcloud/initial-state'
 
 export default {
 	name: 'PersonalSettings',
 	data() {
 		return {
-			sendNotification: false,
+			sendNotifications: !loadState('monthly_notifications', 'opted-out', false),
 		}
 	},
 	watch: {
-		sendNotification() {
+		sendNotifications() {
 			this.saveSetting()
 		},
 	},
 	methods: {
 		async saveSetting() {
 			const data = {
-				optedOut: !this.sendNotification,
+				optedOut: !this.sendNotifications,
 			}
 			await axios.post(generateUrl('/apps/monthly_notifications/') + 'update', data)
 		},

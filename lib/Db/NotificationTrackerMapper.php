@@ -48,29 +48,35 @@ class NotificationTrackerMapper extends QBMapper {
 	/**
 	 * @throws \OCP\DB\Exception
 	 */
-	public function uptadeOptedOutByToken(string $token, bool $optedOut) {
+	public function updateOptedOutByToken(string $token, bool $optedOut): void {
 		$qb = $this->db->getQueryBuilder();
 
-		$qb->update($this->getTableName(), 'o')
-			->set('o.opted_out', $qb->createNamedParameter($optedOut))
-			->where('o.secret_token', $qb->createNamedParameter($token))
-			->executeStatement();
+		$qb->update($this->getTableName())
+			->set('opted_out', $qb->createNamedParameter($optedOut))
+			->where($qb->expr()->eq('secret_token', $qb->createNamedParameter($token)));
+		$qb->executeStatement();
 	}
 
 	/**
 	 * @param \DateTimeInterface $date
 	 * @return NotificationTracker[]
-	 * @throws \OCP\DB\Exception
 	 */
 	public function findAllOlderThan(\DateTimeInterface $date, int $limit): array {
 		$qb = $this->db->getQueryBuilder();
 
-		$qb->select('*')
-			->from($this->getTableName())
-			->where(
-				$qb->expr()->lt('lastSendNotification', $qb->createNamedParameter($date->getTimestamp()))
-			)
-			->setMaxResults($limit);
+		try {
+			$qb->select('*')
+				->from($this->getTableName())
+				->where(
+					$qb->expr()->gt('lastSendNotification', $date->getTimestamp())
+				)
+				->andWhere(
+					$qb->expr()->eq('opted_out', false)
+				)
+				->setMaxResults($limit);
+		} catch (\Exception $e) {
+			echo 'rerre';
+		}
 
 		return $this->findEntities($qb);
 	}

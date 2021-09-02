@@ -24,14 +24,39 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyNotifications\Settings;
 
+use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Services\IInitialState;
+use OCP\IUserSession;
 use OCP\Settings\ISettings;
 
 class PersonalSettings implements ISettings {
 	/**
+	 * @var IInitialState
+	 */
+	private $initialState;
+	/**
+	 * @var NotificationTrackerService
+	 */
+	private $service;
+	/**
+	 * @var IUserSession
+	 */
+	private $userSession;
+
+	public function __construct(IInitialState $initialState,
+								NotificationTrackerService $service,
+								IUserSession $userSession) {
+		$this->initialState = $initialState;
+		$this->service = $service;
+		$this->userSession = $userSession;
+	}
+
+	/**
 	 * @return TemplateResponse
 	 */
 	public function getForm(): TemplateResponse {
+		$this->initialState->provideInitialState('opted-out', $this->service->find($this->userSession->getUser()->getUID())->getOptedOut());
 		return new TemplateResponse('monthly_notifications', 'settings-personal', []);
 	}
 

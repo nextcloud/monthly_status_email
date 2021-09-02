@@ -29,12 +29,12 @@ namespace OCA\MonthlyNotifications\Jobs;
 use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
+use OCP\Files\FileInfo;
 use OCP\IConfig;
-use OCP\IUser;
+use OCP\IL10N;
+use OCP\IURLGenerator;
 use OCP\IUserManager;
-use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
-use OCP\User\Backend\IGetRealUIDBackend;
 
 class SendNotifications extends TimedJob {
 	/** @var NotificationTrackerService $service */
@@ -52,29 +52,42 @@ class SendNotifications extends TimedJob {
 	 * @var IMailer
 	 */
 	private $mailer;
+	/**
+	 * @var IL10N
+	 */
+	private $l;
+	/**
+	 * @var IURLGenerator
+	 */
+	private $generator;
 
 	public function __construct($appName,
 								ITimeFactory $time,
 								NotificationTrackerService $service,
 								IUserManager $userManager,
 								IConfig $config,
-								IMailer $mailer) {
-		$this->setInterval(60 * 60 * 3); // every 3 hours
+								IMailer $mailer,
+								IL10N $l,
+								IURLGenerator $generator) {
 		parent::__construct($time);
+		//$this->setInterval(60 * 60 * 3); // every 3 hours
 		$this->service = $service;
 		$this->userManager = $userManager;
 		$this->config = $config;
 		$this->appName = $appName;
 		$this->mailer = $mailer;
+		$this->l = $l;
+		$this->generator = $generator;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	protected function run($argument): void {
-		$limit = $this->config->getAppValue($this->appName, 'max_mail_sent', 100);
+		$limit = (int)$this->config->getAppValue($this->appName, 'max_mail_sent', 100);
 
-		$trackedNotifications = $this->service->findAllOlderThan(new \DateTime("-1 month"), $limit);
+		//$trackedNotifications = $this->service->findAllOlderThan(new \DateTime("-1 month"), $limit);
+		$trackedNotifications = $this->service->findAllOlderThan(new \DateTime('now'), $limit);
 		foreach ($trackedNotifications as $trackedNotification) {
 			$message = $this->mailer->createMessage();
 			$user = $this->userManager->get($trackedNotification->getUserId());
@@ -89,9 +102,39 @@ class SendNotifications extends TimedJob {
 
 			$emailTemplate = $this->mailer->createEMailTemplate('quote.notification');
 			$emailTemplate->addHeader();
-			$emailTemplate->addHeading('Welcome aboard');
-			$emailTemplate->addBodyText('Quota: ' . $user->getQuota());
- 			$emailTemplate->addFooter('Optional footer text');
+			$emailTemplate->addHeading('Hello ' . $user->getDisplayName());
+
+			// make sure FS is setup before querying storage related stuff...
+			\OC_Util::setupFS($user->getUID());
+
+			$storageInfo = \OC_Helper::getStorageInfo('/');
+			if ($storageInfo['quota'] === FileInfo::SPACE_UNLIMITED) {
+				$totalSpace = $this->l->t('Unlimited');
+			} else {
+				$totalSpace = \OC_Helper::humanFileSize($storageInfo['total']);
+			}
+			$usedSpace = \OC_Helper::humanFileSize($storageInfo['used']);
+			if ($storageInfo['quota'] !== FileInfo::SPACE_UNLIMITED) {
+				$quota = \OC_Helper::humanFileSize($storageInfo['quota']);
+				$emailTemplate->addBodyText(
+					$this->l->t('You are currently using <strong>' . $usedSpace . '</strong> of <strong>' . $quota . '</strong>.'),
+					$this->l->t('You are currently using ' . $usedSpace . ' of ' . $quota . '.')
+				);
+				if ($storageInfo['usage_relative'] > 80) {
+					// todo display warning
+					$emailTemplate->addBodyText($this->l->t('You are using over 80% of your quota.'));
+				}
+			} else {
+				$emailTemplate->addBodyText(
+					$this->l->t('You are currently using <strong>' . $usedSpace . '</strong> of storage.'),
+					$this->l->t('You are currently using ' . $usedSpace . ' of storage.')
+				);
+			}
+			$emailTemplate->addFooter($this->l->t('You can unsubscribe by clicking on this link: <a href="%s">Unsubscribe</a>', [
+				$this->generator->getAbsoluteURL($this->generator->linkToRoute($this->appName.'.optout.displayOptingOutPage', [
+					'token' => $trackedNotification->getSecretToken()
+				]))
+			]));
  			$message->useTemplate($emailTemplate);
  			$this->mailer->send($message);
 		}

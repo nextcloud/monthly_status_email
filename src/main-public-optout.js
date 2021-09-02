@@ -1,6 +1,8 @@
 /**
  * @copyright Copyright (c) 2021 Carl Schwan <carl@carlschwan.eu>
  *
+ * @author Carl Schwan <carl@carlschwan.eu>
+ *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,13 +20,14 @@
  *
  */
 
-const path = require('path')
+import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
 
-const webpackConfig = require('@nextcloud/webpack-vue-config')
+(function() {
+	const queryString = window.location.search
+	const urlParams = new URLSearchParams(queryString)
 
-webpackConfig.entry = {
-	personalSettings: path.join(__dirname, 'src', 'main-personal-settings.js'),
-	publicOptout: path.join(__dirname, 'src', 'main-public-optout.js'),
-}
-
-module.exports = webpackConfig
+	axios.post(generateUrl('/apps/monthly_notifications/') + 'optout', {
+		token: urlParams.get('token'),
+	})
+})()

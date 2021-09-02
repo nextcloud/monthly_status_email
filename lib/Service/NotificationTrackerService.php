@@ -60,7 +60,7 @@ class NotificationTrackerService {
 		try {
 			return $this->mapper->find($userId);
 		} catch(\Exception $e) {
-			$this->handleException($e);
+			return $this->create($userId, false, time());
 		}
 	}
 
@@ -139,7 +139,7 @@ class NotificationTrackerService {
 
 	public function uptadeOptedOutByToken(string $token, bool $optedOut) {
 		try {
-			$this->mapper->uptadeOptedOutByToken($token, $optedOut);
+			$this->mapper->updateOptedOutByToken($token, $optedOut);
 		} catch (Exception $e) {
 			$this->handleException($e);
 		}

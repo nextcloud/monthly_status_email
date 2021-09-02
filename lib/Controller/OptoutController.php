@@ -80,6 +80,7 @@ class OptoutController extends Controller {
 
 	/**
 	 * @PublicPage
+	 * @NoCSRFRequired
 	 * @UserRateThrottle
 	 * @param bool $token
 	 * @param bool $optedOut
@@ -94,12 +95,17 @@ class OptoutController extends Controller {
 		]);
 	}
 
-	public function updateOptingOut(string $token, bool $optedOut): TemplateResponse {
+	/**
+	 * @PublicPage
+	 * @UserRateThrottle
+	 * @param bool $token
+	 * @return DataResponse
+	 */
+	public function updateOptingOut(string $token): Response {
 		try {
-			$this->service->uptadeOptedOutByToken($token, $optedOut);
-			return new PublicTemplateResponse($this->appName, 'public-opting-out', [
-				'token' => $token,
-				'optedOut' => $optedOut,
+			$this->service->uptadeOptedOutByToken($token, true);
+			return new DataResponse([
+				'done' => true
 			]);
 		} catch (NotFoundException $exception) {
 			return new NotFoundResponse();
