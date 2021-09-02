@@ -62,7 +62,7 @@ class PersonalSettings implements ISettings {
 
 	/** {@inheritDoc} */
 	public function getSection(): string {
-		return 'security';
+		return 'personal-info';
 	}
 
 	/** {@inheritDoc} */
