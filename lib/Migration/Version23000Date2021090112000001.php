@@ -60,6 +60,10 @@ class Version23000Date2021090112000001 extends SimpleMigrationStep {
 				'notnull' => true,
 				'default' => false,
 			]);
+			$table->addColumn('first_time_sent', 'boolean', [
+				'notnull' => false,
+				'default' => false,
+			]);
 			$table->addUniqueIndex(['user_id', 'secret_token']);
 
 			$table->setPrimaryKey(['id']);

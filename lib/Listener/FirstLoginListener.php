@@ -24,23 +24,62 @@
 
 namespace OCA\MonthlyNotifications\Listener;
 
+use OCA\MonthlyNotifications\Service\MessageProvider;
+use OCA\MonthlyNotifications\Service\NotFoundException;
 use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\IUser;
+use OCP\Mail\IMailer;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
+// TODO port to IListener
 class FirstLoginListener {
-	/**
-	 * @var NotificationTrackerService
-	 */
+	/** @var IMailer */
+	private $mailer;
+	/** @var NotificationTrackerService */
 	private $service;
+	/**
+	 * @var MessageProvider
+	 */
+	private $provider;
 
-	public function __construct(NotificationTrackerService $service) {
+	public function __construct(IMailer $mailer, NotificationTrackerService $service,
+								MessageProvider $provider) {
+		$this->mailer = $mailer;
 		$this->service = $service;
+		$this->provider = $provider;
 	}
 
+	/**
+	 * This methods handles sending the welcome mail on first logging for new
+	 * users.
+	 * @param GenericEvent $event
+	 * @throws NotFoundException
+	 */
 	public function handle(GenericEvent $event): void {
 		/** @var IUser $user */
 		$user = $event->getSubject();
-		$this->service->create($user->getUID(), false, time());
+
+		$message = $this->mailer->createMessage();
+		$trackedNotification = $this->service->find($user->getUID());
+		if (!$trackedNotification) {
+			return;
+		}
+		$to = $user->getEMailAddress();
+		if ($to === null) {
+			// We don't have any email address ignore the users. We can't send
+			// mails to them.
+			return;
+		}
+		$message->setFrom([$this->provider->getFromAddress()]);
+		$message->setTo([$to]);
+
+		$emailTemplate = $this->mailer->createEMailTemplate('welcome.mail');
+		$emailTemplate->addHeader();
+
+		$this->provider->writeWelcomeMail($emailTemplate, $user->getDisplayName());
+		$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
+
+		$message->useTemplate($emailTemplate);
+		$this->mailer->send($message);
 	}
 }

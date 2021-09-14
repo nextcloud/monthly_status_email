@@ -31,10 +31,12 @@ use OCP\AppFramework\Db\Entity;
  * @method setLastSendNotification(int $time): void
  * @method setOptedOut(bool $optedOut): void
  * @method setSecretToken(string $secretToken): void
+ * @method setFirstTimeSent(bool $firstTimeSent): void
  * @method getUserId(): string
  * @method getLastSendNotification(): int
  * @method getOptedOut(): bool
  * @method getSecretToken(): string
+ * @method getFirstTimeSent(): bool
  */
 class NotificationTracker extends Entity implements \JsonSerializable {
 
@@ -63,6 +65,12 @@ class NotificationTracker extends Entity implements \JsonSerializable {
 	 */
 	protected $secretToken;
 
+	/**
+	 * This property holds whether the first status mail was sent.
+	 * @var bool $firstTimeSent
+	 */
+	protected $firstTimeSent;
+
 	public function __construct() {
 		$this->addType('id','integer');
 		$this->addType('lastSendNotification', 'integer');
@@ -77,6 +85,7 @@ class NotificationTracker extends Entity implements \JsonSerializable {
 			'last_send_notification' => $this->lastSendNotification,
 			'opted_out' => $this->optedOut,
 			'secret_token' => $this->secretToken,
+			'first_time_sent' => $this->firstTimeSent,
 		];
 	}
 }

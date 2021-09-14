@@ -22,6 +22,8 @@ declare(strict_types=1);
  *
  */
 
+namespace OCA\MonthlyNotifications\AppInfo;
+
 use OCA\MonthlyNotifications\Listener\FirstLoginListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -46,6 +48,7 @@ class Application extends App implements IBootstrap {
 	public function boot(IBootContext $context): void {
 		$context->injectFn([$this, 'registerHooks']);
 	}
+
 	public function registerHooks(FirstLoginListener $firstLoginListener,
 								  EventDispatcherInterface $dispatcher) {
 		// TODO port to IEventListener
