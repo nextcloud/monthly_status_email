@@ -184,6 +184,7 @@ EOF,
 			);
 			$emailTemplate->addHeading('Hallo,');
 			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist fast vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
 			$this->writeClosing($emailTemplate);
 			return true;
 		} else {
@@ -208,6 +209,7 @@ EOF,
 			);
 			$emailTemplate->addHeading('Hallo,');
 			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
 			$this->writeClosing($emailTemplate);
 			return true;
 		}
@@ -217,8 +219,8 @@ EOF,
 		$emailTemplate->addHeading("Welcome !", [$name]);
 
 		$emailTemplate->addBodyText(
-			'mit der Status-Mail zur   ' . $this->entity . ' informieren wir Sie einmail montatlich über Ihren belegten Speicherplatz und über Ihre erteilten Freigaben.',
-			'mit der Status-Mail zur   ' . strip_tags($this->entity) . ' informieren wir Sie einmail montatlich über Ihren belegten Speicherplatz und über Ihre erteilten Freigaben.'
+			'mit der Status-Mail zur ' . $this->entity . ' informieren wir Sie einmail montatlich über Ihren belegten Speicherplatz und über Ihre erteilten Freigaben.',
+			'mit der Status-Mail zur ' . strip_tags($this->entity) . ' informieren wir Sie einmail montatlich über Ihren belegten Speicherplatz und über Ihre erteilten Freigaben.'
 		);
 
 		$emailTemplate->addBodyText(
@@ -279,6 +281,7 @@ EOF,
 
 	public function writeGenericMessage(IEMailTemplate $emailTemplate, IUser $user, int $messageId): void {
 		$emailTemplate->addHeading('Hallo ' . $user->getDisplayName() . ',');
+		$home = $this->generator->getAbsoluteURL('/');
 
 		switch ($messageId) {
 			case SendNotifications::NO_SHARE_AVAILABLE:
@@ -287,6 +290,7 @@ EOF,
 					'Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste Momente jetzt ganz einfach mit Ihren Liebsten. Dies funktioniert ohne den umständlichen Austausch von Datenträgern. Auch Datein, die für einen E-Mail-Anhang zu groß sind, können Sie mit Ihrer ' . $this->entity . ' anderen bequem per Link zur Verfügung stellen.',
 					'Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste Momente jetzt ganz einfach mit Ihren Liebsten. Dies funktioniert ohne den umständlichen Austausch von Datenträgern. Auch Datein, die für einen E-Mail-Anhang zu groß sind, können Sie mit Ihrer ' . strip_tags($this->entity) . ' anderen bequem per Link zur Verfügung stellen.'
 				);
+				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
 			case SendNotifications::NO_DESKTOP_CLIENT_CONNECTION:
@@ -304,26 +308,32 @@ EOF,
 					'Nach Download des kostenlose Software wird Ihre ' . $this->entity . ' als Ordner auf Ihrem Windows PC oder Mac angelegt. Alle Dateien, die Sie in diesen Ordner verschieben, werden automatisch mit Ihrer Cloud synchronisiert - so bleibt alles auf dem aktuellsten Stand. Öffnen Sie die Dateien aus Ihrer ' . $this->entity . ' mit Ihren gewohnten Anwendungen (z.B. Office) und machen Sie Äanderungen blitzschnell auf allen Geräten verfügbar.',
 					'Nach Download des kostenlose Software wird Ihre ' . strip_tags($this->entity) . ' als Ordner auf Ihrem Windows PC oder Mac angelegt. Alle Dateien, die Sie in diesen Ordner verschieben, werden automatisch mit Ihrer Cloud synchronisiert - so bleibt alles auf dem aktuellsten Stand. Öffnen Sie die Dateien aus Ihrer ' . strip_tags($this->entity) . ' mit Ihren gewohnten Anwendungen (z.B. Office) und machen Sie Äanderungen blitzschnell auf allen Geräten verfügbar.'
 				);
-				return;
+				$emailTemplate->addBodyButton('Zur ' . $this->productName . ' Sync Software', 'TODO', 'Zur ' . strip_tags($this->productName) . ' Sync Software');
+			return;
 
 			case SendNotifications::NO_FILE_UPLOAD:
 				$emailTemplate->addBodyText('TODO message to send then there is no file uploded');
+				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
 			case SendNotifications::TIP_MORE_STORAGE:
 				$emailTemplate->addBodyText('TODO message to advertise how to increase the storage outside of the out of storage place situation');
+				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
 			case SendNotifications::TIP_DISCOVER_PARTNER:
 				$emailTemplate->addBodyText('TODO message to advertise partners');
+				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
 			case SendNotifications::TIP_FILE_RECOVERY:
 				$emailTemplate->addBodyText('TODO message to explain how to recover data');
+				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
 			case SendNotifications::TIP_EMAIL_CENTER:
 				$emailTemplate->addBodyText('TODO message to explain the email center');
+				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 		}
 	}
