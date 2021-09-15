@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace OCA\MonthlyNotifications\Jobs;
 
 use OCA\MonthlyNotifications\Db\NotificationTracker;
+use OCA\MonthlyNotifications\Service\MessageProvider;
 use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
@@ -76,6 +77,10 @@ class SendNotifications extends TimedJob {
 	 * @var string
 	 */
 	private $entity;
+	/**
+	 * @var MessageProvider
+	 */
+	private $provider;
 
 	public function __construct($appName,
 								ITimeFactory $time,
@@ -85,7 +90,8 @@ class SendNotifications extends TimedJob {
 								IMailer $mailer,
 								IL10N $l,
 								IURLGenerator $generator,
-								IManager $shareManager) {
+								IManager $shareManager,
+								MessageProvider $provider) {
 		parent::__construct($time);
 		//$this->setInterval(60 * 60 * 3); // every 3 hours
 		$this->service = $service;
@@ -96,7 +102,8 @@ class SendNotifications extends TimedJob {
 		$this->l = $l;
 		$this->generator = $generator;
 		$this->shareManager = $shareManager;
-		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', $this->entity));
+		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
+		$this->provider = $provider;
 	}
 
 	/**
@@ -121,67 +128,52 @@ class SendNotifications extends TimedJob {
 
 			$emailTemplate = $this->mailer->createEMailTemplate('quote.notification');
 			$emailTemplate->addHeader();
-			$emailTemplate->addHeading($this->l->t('Hello %s', [$user->getDisplayName()]);
 
 			// make sure FS is setup before querying storage related stuff...
 			\OC_Util::setupFS($user->getUID());
 
+			// Handle storage specific events
 			$storageInfo = \OC_Helper::getStorageInfo('/');
-			if ($storageInfo['quota'] === FileInfo::SPACE_UNLIMITED) {
-				$totalSpace = $this->l->t('Unlimited');
-			} else {
-				$totalSpace = \OC_Helper::humanFileSize($storageInfo['total']);
+			$stop = $this->provider->writeStorageUsage($emailTemplate, $storageInfo);
+
+			if ($stop) {
+				$this->provider->writeClosing($emailTemplate);
+				$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
+				continue;
 			}
-			$usedSpace = \OC_Helper::humanFileSize($storageInfo['used']);
-			if ($storageInfo['quota'] !== FileInfo::SPACE_UNLIMITED) {
-				$quota = \OC_Helper::humanFileSize($storageInfo['quota']);
-				$emailTemplate->addBodyText(
-					$this->l->t('You are currently using <strong>' . $usedSpace . '</strong> of <strong>' . $quota . '</strong>.'),
-					$this->l->t('You are currently using ' . $usedSpace . ' of ' . $quota . '.')
-				);
-				if ($storageInfo['usage_relative'] > 99) {
-					// nearly full
-					$emailTemplate->addBodyText($this->l->t('Your disk usage is full.'));
-				} elseif ($storageInfo['usage_relative'] > 90) {
-					$emailTemplate->addBodyText($this->l->t('You are using over 90% of your quota.'));
-				}
-			} else {
-				$emailTemplate->addBodyText(
-					$this->l->t('You are currently using <strong>' . $usedSpace . '</strong> of storage.'),
-					$this->l->t('You are currently using ' . $usedSpace . ' of storage.')
-				);
 
-				$requestedShareTypes = [
-					IShare::TYPE_USER,
-					IShare::TYPE_GROUP,
-					IShare::TYPE_LINK,
-					IShare::TYPE_REMOTE,
-					IShare::TYPE_EMAIL,
-					IShare::TYPE_ROOM,
-					IShare::TYPE_CIRCLE,
-					IShare::TYPE_DECK,
-				];
-				$hasShare = false;
-				foreach ($requestedShareTypes as $requestedShareType) {
-					$shares = $this->shareManager->getSharesBy(
-						$user->getUID(),
-						$requestedShareType,
-						null,
-						false,
-						1
-					);
-					if (count($shares)) {
-						$hasShare = true;
-					}
-				}
-
-				if (!$hasShare) {
-					$emailTemplate->addBodyText(
-						// TODO way better text :D
-						$this->l->t('Nextcloud is cool and allows you to share files with your friends, colleagues and family. Try it now...'),
-					);
+			// Handle share specific events
+			$requestedShareTypes = [
+				IShare::TYPE_USER,
+				IShare::TYPE_GROUP,
+				IShare::TYPE_LINK,
+				IShare::TYPE_REMOTE,
+				IShare::TYPE_EMAIL,
+				IShare::TYPE_ROOM,
+				IShare::TYPE_CIRCLE,
+				IShare::TYPE_DECK,
+			];
+			$shareCount = 0;
+			foreach ($requestedShareTypes as $requestedShareType) {
+				$shares = $this->shareManager->getSharesBy(
+					$user->getUID(),
+					$requestedShareType,
+					null,
+					false,
+					100
+				);
+				$shareCount += count($shares);
+				if ($shareCount > 100) {
+					break; // don't
 				}
 			}
+
+			if (!$hasShare) {
+				$emailTemplate->addBodyText(
+					// TODO way better text :D
+					$this->l->t('Nextcloud is cool and allows you to share files with your friends, colleagues and family. Try it now...'),
+				);
+			}*/
 			$emailTemplate->addFooter($this->l->t('You can unsubscribe by clicking on this link: <a href="%s">Unsubscribe</a>', [
 				$this->generator->getAbsoluteURL($this->generator->linkToRoute($this->appName.'.optout.displayOptingOutPage', [
 					'token' => $trackedNotification->getSecretToken()

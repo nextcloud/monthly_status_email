@@ -26,10 +26,10 @@ namespace OCA\MonthlyNotifications\Service;
 
 
 use OCA\MonthlyNotifications\Db\NotificationTracker;
+use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IURLGenerator;
-use OCP\IUser;
 use OCP\Mail\IEMailTemplate;
 
 class MessageProvider {
@@ -51,9 +51,167 @@ class MessageProvider {
 	public function __construct(IL10N $l, IConfig $config, IURLGenerator $generator) {
 		$this->l = $l;
 		$this->productName = strip_tags($config->getAppValue('theming', 'productName', 'Nextcloud'));
-		$this->entiy = strip_tags($config->getAppValue('theming', 'name', 'Nextcloud'));
+		$this->entiy = $config->getAppValue('theming', 'name', 'Nextcloud');
 		$this->generator = $generator;
 		$this->config = $config;
+	}
+
+	/**
+	 * Similar to OC_Utils::humanFileSize but extract the units and number
+	 * separately.
+	 *
+	 * @param int $bytes
+	 * @return array|string[]
+	 */
+	protected function humanFileSize(int $bytes): array {
+		if ($bytes < 0) {
+			return ['?', ''];
+		}
+		if ($bytes < 1024) {
+			return [$bytes, 'B'];
+		}
+		$bytes = round($bytes / 1024, 0);
+		if ($bytes < 1024) {
+			return [$bytes, 'KB'];
+		}
+		$bytes = round($bytes / 1024, 1);
+		if ($bytes < 1024) {
+			return [$bytes, 'MB'];
+		}
+		$bytes = round($bytes / 1024, 1);
+		if ($bytes < 1024) {
+			return [$bytes, 'GB'];
+		}
+		$bytes = round($bytes / 1024, 1);
+		if ($bytes < 1024) {
+			return [$bytes, 'TB'];
+		}
+
+		$bytes = round($bytes / 1024, 1);
+		return [$bytes, 'PB'];
+	}
+
+	/**
+	 * Link to get more storage or an empty string if not such
+	 * functionality exists.
+	 *
+	 * @return string
+	 */
+	protected function getRequestMoreStorageLink(): string {
+		return '';
+	}
+
+	/**
+	 * Write generic end of mail. (e.g Thanks, Service name, ...)
+	 */
+	public function writeClosing(IEMailTemplate $emailTemplate): void {
+		$emailTemplate->addBodyText('Your Nextcloud');
+	}
+
+	/**
+	 * @param IEMailTemplate $emailTemplate
+	 * @param array $storageInfo
+	 * @return bool True if we should stop processing the condition after calling
+	 * this method.
+	 */
+	public function writeStorageUsage(IEMailTemplate $emailTemplate, array $storageInfo): bool {
+		$quota = $this->humanFileSize($storageInfo['quota']);
+		$usedSpace = $this->humanFileSize($storageInfo['used']);
+
+		$requestMoreStorageLink = $this->getRequestMoreStorageLink();
+		if ($requestMoreStorageLink !== '') {
+			$requestMoreStorageLink = '<p>' . $requestMoreStorageLink . '</p>';
+		}
+
+		if ($storageInfo['quota'] === FileInfo::SPACE_UNLIMITED) {
+			// Message no quota
+			$emailTemplate->addBodyText(<<<EOF
+<table style="background-color: #f8f8f8; padding: 20px; width: 100%">
+	<tr>
+		<td>
+			<span style="font-size: 35px">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+		</td>
+		<td>
+			<h3 style="font-weight: bold">Speicherplatz</h3>
+			<p>Sie nutzen im Moment $usedSpace[0] $usedSpace[1].</p>
+			$requestMoreStorageLink
+		</td>
+	</tr>
+</table>
+EOF,
+				"Speicherplatz\n\nSie nutzen im Moment $usedSpace"
+			);
+			return false;
+		} else if ($storageInfo['usage_relative'] < 90) {
+			// Message quota but less than 90% used
+			$emailTemplate->addBodyText(<<<EOF
+<table style="background-color: #f8f8f8; padding: 20px">
+	<tr>
+		<td>
+			<span style="font-size: 35px">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+			<hr />
+			<span style="font-size: 35px">$quota[0]</span> <span style="font-size: larger">$quota[1]</span>
+		</td>
+		<td>
+			<h3 style="font-weight: bold">Speicherplatz</h3>
+			<p>Sie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1].</p>
+			$requestMoreStorageLink
+		</td>
+	</tr>
+</table>
+EOF,
+				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
+			);
+			return false;
+		} else if ($storageInfo['usage_relative'] < 99) {
+			// Warning almost no storage left
+			$emailTemplate->addBodyText(<<<EOF
+<table style="background-color: #f8f8f8; padding: 20px">
+	<tr>
+		<td>
+			<span style="font-size: 35px; color: orange">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+			<hr />
+			<span style="font-size: 35px">$quota[0]</span> <span style="font-size: larger">$quota[1]</span>
+		</td>
+		<td>
+			<h3 style="font-weight: bold">Speicherplatz</h3>
+			<p>Sie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1].</p>
+			$requestMoreStorageLink
+		</td>
+	</tr>
+</table>
+EOF,
+				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
+			);
+			$emailTemplate->addHeading('Hallo,');
+			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entiy . ' ist fast vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+			$this->writeClosing($emailTemplate);
+			return true;
+		} else {
+			// Warning no storage left
+			$emailTemplate->addBodyText(<<<EOF
+<table style="background-color: #f8f8f8; padding: 20px">
+	<tr>
+		<td>
+			<span style="font-size: 35px; color: red">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+			<hr />
+			<span style="font-size: 35px">$quota[0]</span> <span style="font-size: larger">$quota[1]</span>
+		</td>
+		<td>
+			<h3 style="font-weight: bold">Speicherplatz</h3>
+			<p>Sie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1].</p>
+			$requestMoreStorageLink
+		</td>
+	</tr>
+</table>
+EOF,
+				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
+			);
+			$emailTemplate->addHeading('Hallo,');
+			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entiy . ' ist vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+			$this->writeClosing($emailTemplate);
+			return true;
+		}
 	}
 
 	public function writeWelcomeMail(IEMailTemplate $emailTemplate, ?string $name): void {
@@ -78,7 +236,7 @@ class MessageProvider {
 		]));
 	}
 
-	public function getFromAddress():string {
+	public function getFromAddress(): string {
 		$sendFromDomain = $this->config->getSystemValue('mail_domain', 'domain.org');
 		$sendFromAddress = $this->config->getSystemValue('mail_from_address', 'nextcloud');
 
