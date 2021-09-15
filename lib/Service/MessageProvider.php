@@ -35,8 +35,6 @@ use OCP\IUser;
 use OCP\Mail\IEMailTemplate;
 
 class MessageProvider {
-	/** @var IL10N */
-	private $l;
 	/**
 	 * @var string
 	 */
@@ -50,10 +48,9 @@ class MessageProvider {
 	 */
 	private $config;
 
-	public function __construct(IL10N $l, IConfig $config, IURLGenerator $generator) {
-		$this->l = $l;
-		$this->productName = strip_tags($config->getAppValue('theming', 'productName', 'Nextcloud'));
-		$this->entiy = $config->getAppValue('theming', 'name', 'Nextcloud');
+	public function __construct(IConfig $config, IURLGenerator $generator) {
+		$this->productName = $config->getAppValue('theming', 'productName', 'Nextcloud');
+		$this->entity = $config->getAppValue('theming', 'name', 'Nextcloud');
 		$this->generator = $generator;
 		$this->config = $config;
 	}
@@ -186,7 +183,7 @@ EOF,
 				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
 			);
 			$emailTemplate->addHeading('Hallo,');
-			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entiy . ' ist fast vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist fast vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
 			$this->writeClosing($emailTemplate);
 			return true;
 		} else {
@@ -210,25 +207,24 @@ EOF,
 				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
 			);
 			$emailTemplate->addHeading('Hallo,');
-			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entiy . ' ist vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
 			$this->writeClosing($emailTemplate);
 			return true;
 		}
 	}
 
-	public function writeWelcomeMail(IEMailTemplate $emailTemplate, ?string $name): void {
-		if ($name) {
-			$emailTemplate->addHeading($this->l->t('Welcome %s!', [$name]));
-		} else {
-			$emailTemplate->addHeading($this->l->t('Welcome!'));
-		}
+	public function writeWelcomeMail(IEMailTemplate $emailTemplate, string $name): void {
+		$emailTemplate->addHeading("Welcome !", [$name]);
+
 		$emailTemplate->addBodyText(
-			$this->l->t('with this status email about %s, we are informing you of your current storage usage and your current shares.', [$this->productName])
+			'mit der Status-Mail zur   ' . $this->entity . ' informieren wir Sie einmail montatlich über Ihren belegten Speicherplatz und über Ihre erteilten Freigaben.',
+			'mit der Status-Mail zur   ' . strip_tags($this->entity) . ' informieren wir Sie einmail montatlich über Ihren belegten Speicherplatz und über Ihre erteilten Freigaben.'
 		);
+
 		$emailTemplate->addBodyText(
-			$this->l->t('We will also give you some tips and tricks on how to use %s during your daily life. You can learn how to download, move, share files, etc. on our <a href="https://docs.nextcloud.com/server/latest/user_manual/en/">first start documentation</a>.',
-				'We will also give you some tips and tricks on how to use %s during your daily life. You can learn how to download, move, share files, etc. on our [first start documentation](https://docs.nextcloud.com/server/latest/user_manual/en/).'
-			)
+			'Außerdem geben wir Ihnen Tipps und Tricks zum täaglichen Umgang mit Ihrer ' . $this->entity . '. Wie Sie Dateien hochlanden, verschieben, freigeben, etc., erfagren Sie hier: <a href="TODO">Erste Hilfe</a>',
+
+			'Außerdem geben wir Ihnen Tipps und Tricks zum täaglichen Umgang mit Ihrer ' . strip_tags($this->entity) . '. Wie Sie Dateien hochlanden, verschieben, freigeben, etc., erfagren Sie hier: [Erste Hilfe](TODO)',
 		);
 	}
 
@@ -281,13 +277,54 @@ EOF,
 		]);
 	}
 
-	public function writeGenericMessage(IEMailTemplate $emailTemplate, IUser $user, string $messageId): void {
+	public function writeGenericMessage(IEMailTemplate $emailTemplate, IUser $user, int $messageId): void {
 		$emailTemplate->addHeading('Hallo ' . $user->getDisplayName() . ',');
 
-		switch ($emailTemplate) {
+		switch ($messageId) {
 			case SendNotifications::NO_SHARE_AVAILABLE:
 				$emailTemplate->addBodyText('bisher haben Sie keine Dateien order Ordner freigegeben.');
-				$emailTemplate->addBodyText('Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste ');
+				$emailTemplate->addBodyText(
+					'Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste Momente jetzt ganz einfach mit Ihren Liebsten. Dies funktioniert ohne den umständlichen Austausch von Datenträgern. Auch Datein, die für einen E-Mail-Anhang zu groß sind, können Sie mit Ihrer ' . $this->entity . ' anderen bequem per Link zur Verfügung stellen.',
+					'Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste Momente jetzt ganz einfach mit Ihren Liebsten. Dies funktioniert ohne den umständlichen Austausch von Datenträgern. Auch Datein, die für einen E-Mail-Anhang zu groß sind, können Sie mit Ihrer ' . strip_tags($this->entity) . ' anderen bequem per Link zur Verfügung stellen.'
+				);
+				return;
+
+			case SendNotifications::NO_DESKTOP_CLIENT_CONNECTION:
+			case SendNotifications::NO_MOBILE_CLIENT_CONNECTION:
+			case SendNotifications::NO_CLIENT_CONNECTION:
+				// TODO different message depending on if mobile, desktop or both apps weren't
+				// used yet.
+				// WARNING There might be some false positive in case an user renamed their devices
+				// or deleted their client app token.
+				$emailTemplate->addBodyText(
+					'kennen Sie schon die kostenlose ' . $this->entity . ' Synchronisations-Software?',
+					'kennen Sie schon die kostenlose ' . strip_tags($this->entity) . ' Synchronisations-Software?',
+				);
+				$emailTemplate->addBodyText(
+					'Nach Download des kostenlose Software wird Ihre ' . $this->entity . ' als Ordner auf Ihrem Windows PC oder Mac angelegt. Alle Dateien, die Sie in diesen Ordner verschieben, werden automatisch mit Ihrer Cloud synchronisiert - so bleibt alles auf dem aktuellsten Stand. Öffnen Sie die Dateien aus Ihrer ' . $this->entity . ' mit Ihren gewohnten Anwendungen (z.B. Office) und machen Sie Äanderungen blitzschnell auf allen Geräten verfügbar.',
+					'Nach Download des kostenlose Software wird Ihre ' . strip_tags($this->entity) . ' als Ordner auf Ihrem Windows PC oder Mac angelegt. Alle Dateien, die Sie in diesen Ordner verschieben, werden automatisch mit Ihrer Cloud synchronisiert - so bleibt alles auf dem aktuellsten Stand. Öffnen Sie die Dateien aus Ihrer ' . strip_tags($this->entity) . ' mit Ihren gewohnten Anwendungen (z.B. Office) und machen Sie Äanderungen blitzschnell auf allen Geräten verfügbar.'
+				);
+				return;
+
+			case SendNotifications::NO_FILE_UPLOAD:
+				$emailTemplate->addBodyText('TODO message to send then there is no file uploded');
+				return;
+
+			case SendNotifications::TIP_MORE_STORAGE:
+				$emailTemplate->addBodyText('TODO message to advertise how to increase the storage outside of the out of storage place situation');
+				return;
+
+			case SendNotifications::TIP_DISCOVER_PARTNER:
+				$emailTemplate->addBodyText('TODO message to advertise partners');
+				return;
+
+			case SendNotifications::TIP_FILE_RECOVERY:
+				$emailTemplate->addBodyText('TODO message to explain how to recover data');
+				return;
+
+			case SendNotifications::TIP_EMAIL_CENTER:
+				$emailTemplate->addBodyText('TODO message to explain the email center');
+				return;
 		}
 	}
 }

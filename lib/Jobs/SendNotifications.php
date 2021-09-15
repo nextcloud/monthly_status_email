@@ -26,31 +26,33 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyNotifications\Jobs;
 
-use OCA\MonthlyNotifications\Db\NotificationTracker;
+use OC\Files\View;
 use OCA\MonthlyNotifications\Service\MessageProvider;
 use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
-use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IL10N;
-use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
-use OC\Authentication\Token\INamedToken;
-use OC\Authentication\Token\IProvider as IAuthTokenProvider;
-use OC\Authentication\Token\IToken;
 
 class SendNotifications extends TimedJob {
 	public const NO_SHARE_AVAILABLE = 0;
 	public const NO_CLIENT_CONNECTION = 1;
 	public const NO_MOBILE_CLIENT_CONNECTION = 2;
 	public const NO_DESKTOP_CLIENT_CONNECTION = 3;
+	public const RECOMMEND_NEXTCLOUD = 4;
+	public const TIP_FILE_RECOVERY = 5;
+	public const TIP_EMAIL_CENTER = 6;
+	public const TIP_MORE_STORAGE = 7;
+	public const TIP_DISCOVER_PARTNER = 8;
+	public const NO_FILE_UPLOAD = 9;
+	public const NO_EMAIL_UPLOAD = 10;
 
 	/** @var NotificationTrackerService $service */
 	private $service;
@@ -144,7 +146,28 @@ class SendNotifications extends TimedJob {
 
 			if ($stop) {
 				$this->provider->writeClosing($emailTemplate);
+				$message->useTemplate($emailTemplate);
+				$this->mailer->send($message);
+				continue;
+			}
+
+			if ($trackedNotification->getOptedOut()) {
+				// People opting-out of the monthly emails should still get the
+				// 'urgent' email about the storage, but the rest shouldn't be
+				// sent.
+				continue;
+			}
+
+			// Handle no file upload
+			$view = new View('/' . $user->getUID() . '/files/');
+			$directoryContents = $view->getDirectoryContent('');
+			if (count($directoryContents) === 0) {
+				// No file/folder uploded
+				$this->provider->writeGenericMessage($emailTemplate, $user, self::NO_FILE_UPLOAD);
+				$this->provider->writeClosing($emailTemplate);
 				$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
+				$message->useTemplate($emailTemplate);
+				$this->mailer->send($message);
 				continue;
 			}
 
@@ -176,7 +199,7 @@ class SendNotifications extends TimedJob {
 
 			$this->provider->writeShareMessage($emailTemplate, $shareCount);
 
-			$availableGenericMessages = [];
+			$availableGenericMessages = [self::TIP_DISCOVER_PARTNER, self::TIP_EMAIL_CENTER, self::TIP_FILE_RECOVERY, self::TIP_MORE_STORAGE];
 
 			if ($shareCount === 0) {
 				$availableGenericMessages[] = self::NO_SHARE_AVAILABLE;
@@ -210,7 +233,7 @@ class SendNotifications extends TimedJob {
 			}
 
 			$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
-
+			$this->provider->writeClosing($emailTemplate);
 			$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
 			$message->useTemplate($emailTemplate);
 			$this->mailer->send($message);

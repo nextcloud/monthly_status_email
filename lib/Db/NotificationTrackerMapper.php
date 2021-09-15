@@ -70,9 +70,6 @@ class NotificationTrackerMapper extends QBMapper {
 				->where(
 					$qb->expr()->gt('lastSendNotification', $date->getTimestamp())
 				)
-				->andWhere(
-					$qb->expr()->eq('opted_out', false)
-				)
 				->setMaxResults($limit);
 		} catch (\Exception $e) {
 			echo 'rerre';

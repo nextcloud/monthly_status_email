@@ -30,6 +30,7 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\IAppContainer;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IServerContainer;
 use OCP\IUser;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -46,15 +47,14 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function boot(IBootContext $context): void {
-		$context->injectFn([$this, 'registerHooks']);
-	}
-
-	public function registerHooks(FirstLoginListener $firstLoginListener,
-								  EventDispatcherInterface $dispatcher) {
-		// TODO port to IEventListener
-		$dispatcher->addListener(IUser::class . '::firstLogin', function ($event) use ($firstLoginListener) {
+		$container = $context->getAppContainer();
+		$server = $context->getServerContainer();
+		/** @var FirstLoginListener $firstLoginListener */
+		$firstLoginListener = $container->get(FirstLoginListener::class);
+		$server->get(IEventDispatcher::class)
+			->addListener(IUser::class . '::firstLogin', function ($event) use ($firstLoginListener) {
 			if ($event instanceof GenericEvent) {
-				$firstLoginListener->handle($event);
+				$firstLoginListener->handle($event->getSubject());
 			}
 		});
 	}

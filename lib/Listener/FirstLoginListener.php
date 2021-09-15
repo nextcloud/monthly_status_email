@@ -52,18 +52,11 @@ class FirstLoginListener {
 	/**
 	 * This methods handles sending the welcome mail on first logging for new
 	 * users.
-	 * @param GenericEvent $event
 	 * @throws NotFoundException
 	 */
-	public function handle(GenericEvent $event): void {
-		/** @var IUser $user */
-		$user = $event->getSubject();
-
+	public function handle(IUser $user): void {
 		$message = $this->mailer->createMessage();
 		$trackedNotification = $this->service->find($user->getUID());
-		if (!$trackedNotification) {
-			return;
-		}
 		$to = $user->getEMailAddress();
 		if ($to === null) {
 			// We don't have any email address ignore the users. We can't send
