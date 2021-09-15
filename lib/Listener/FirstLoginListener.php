@@ -29,7 +29,6 @@ use OCA\MonthlyNotifications\Service\NotFoundException;
 use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\IUser;
 use OCP\Mail\IMailer;
-use Symfony\Component\EventDispatcher\GenericEvent;
 
 // TODO port to IListener
 class FirstLoginListener {

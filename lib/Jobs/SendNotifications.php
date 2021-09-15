@@ -136,6 +136,7 @@ class SendNotifications extends TimedJob {
 
 			$emailTemplate = $this->mailer->createEMailTemplate('quote.notification');
 			$emailTemplate->addHeader();
+			$emailTemplate->setSubject(strip_tags($this->entity) . ' Status-Mail');
 
 			// make sure FS is setup before querying storage related stuff...
 			\OC_Util::setupFS($user->getUID());
