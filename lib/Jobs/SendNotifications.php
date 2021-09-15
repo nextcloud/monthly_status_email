@@ -33,6 +33,7 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCP\Files\FileInfo;
 use OCP\IConfig;
+use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\IUser;
@@ -46,6 +47,11 @@ use OC\Authentication\Token\IProvider as IAuthTokenProvider;
 use OC\Authentication\Token\IToken;
 
 class SendNotifications extends TimedJob {
+	public const NO_SHARE_AVAILABLE = 0;
+	public const NO_CLIENT_CONNECTION = 1;
+	public const NO_MOBILE_CLIENT_CONNECTION = 2;
+	public const NO_DESKTOP_CLIENT_CONNECTION = 3;
+
 	/** @var NotificationTrackerService $service */
 	private $service;
 
@@ -66,10 +72,6 @@ class SendNotifications extends TimedJob {
 	 */
 	private $l;
 	/**
-	 * @var IURLGenerator
-	 */
-	private $generator;
-	/**
 	 * @var IManager
 	 */
 	private $shareManager;
@@ -81,6 +83,10 @@ class SendNotifications extends TimedJob {
 	 * @var MessageProvider
 	 */
 	private $provider;
+	/**
+	 * @var IDBConnection
+	 */
+	private $connection;
 
 	public function __construct($appName,
 								ITimeFactory $time,
@@ -89,7 +95,7 @@ class SendNotifications extends TimedJob {
 								IConfig $config,
 								IMailer $mailer,
 								IL10N $l,
-								IURLGenerator $generator,
+								IDBConnection $connection,
 								IManager $shareManager,
 								MessageProvider $provider) {
 		parent::__construct($time);
@@ -100,10 +106,10 @@ class SendNotifications extends TimedJob {
 		$this->appName = $appName;
 		$this->mailer = $mailer;
 		$this->l = $l;
-		$this->generator = $generator;
 		$this->shareManager = $shareManager;
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
 		$this->provider = $provider;
+		$this->connection = $connection;
 	}
 
 	/**
@@ -168,17 +174,44 @@ class SendNotifications extends TimedJob {
 				}
 			}
 
-			if (!$hasShare) {
-				$emailTemplate->addBodyText(
-					// TODO way better text :D
-					$this->l->t('Nextcloud is cool and allows you to share files with your friends, colleagues and family. Try it now...'),
-				);
-			}*/
-			$emailTemplate->addFooter($this->l->t('You can unsubscribe by clicking on this link: <a href="%s">Unsubscribe</a>', [
-				$this->generator->getAbsoluteURL($this->generator->linkToRoute($this->appName.'.optout.displayOptingOutPage', [
-					'token' => $trackedNotification->getSecretToken()
-				]))
-			]));
+			$this->provider->writeShareMessage($emailTemplate, $shareCount);
+
+			$availableGenericMessages = [];
+
+			if ($shareCount === 0) {
+				$availableGenericMessages[] = self::NO_SHARE_AVAILABLE;
+			}
+
+			// Handling of desktop/mobile client detection
+			$qb = $this->connection->getQueryBuilder();
+			$hasDesktopClientQuery = $qb->from('authtoken')
+				->select('name')
+				->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
+				->andWhere($qb->expr()->like('name', '%(Desktop Client -%'))
+				->setMaxResults(1);
+			$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
+
+			$hasMobileClientQuery = $qb->from('authtoken')
+				->select('name')
+				->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
+				->andWhere($qb->expr()->orX(
+					$qb->expr()->eq('name', 'Nextcloud-iOS'),
+					$qb->expr()->like('name', '%Nextcloud-android%'),
+				))
+				->setMaxResults(1);
+			$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
+
+			if (!$hasDesktopClientQuery && !$hasMobileClientQuery) {
+				$availableGenericMessages[] = self::NO_CLIENT_CONNECTION;
+			} elseif (!$hasMobileClientQuery) {
+				$availableGenericMessages[] = self::NO_MOBILE_CLIENT_CONNECTION;
+			} elseif (!$hasDesktopClientQuery) {
+				$availableGenericMessages[] = self::NO_DESKTOP_CLIENT_CONNECTION;
+			}
+
+			$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
+
+			$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
 			$message->useTemplate($emailTemplate);
 			$this->mailer->send($message);
 			return;

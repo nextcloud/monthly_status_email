@@ -26,10 +26,12 @@ namespace OCA\MonthlyNotifications\Service;
 
 
 use OCA\MonthlyNotifications\Db\NotificationTracker;
+use OCA\MonthlyNotifications\Jobs\SendNotifications;
 use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IURLGenerator;
+use OCP\IUser;
 use OCP\Mail\IEMailTemplate;
 
 class MessageProvider {
@@ -145,7 +147,7 @@ EOF,
 		} else if ($storageInfo['usage_relative'] < 90) {
 			// Message quota but less than 90% used
 			$emailTemplate->addBodyText(<<<EOF
-<table style="background-color: #f8f8f8; padding: 20px">
+<table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td>
 			<span style="font-size: 35px">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
@@ -166,7 +168,7 @@ EOF,
 		} else if ($storageInfo['usage_relative'] < 99) {
 			// Warning almost no storage left
 			$emailTemplate->addBodyText(<<<EOF
-<table style="background-color: #f8f8f8; padding: 20px">
+<table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td>
 			<span style="font-size: 35px; color: orange">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
@@ -190,7 +192,7 @@ EOF,
 		} else {
 			// Warning no storage left
 			$emailTemplate->addBodyText(<<<EOF
-<table style="background-color: #f8f8f8; padding: 20px">
+<table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td>
 			<span style="font-size: 35px; color: red">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
@@ -224,8 +226,41 @@ EOF,
 			$this->l->t('with this status email about %s, we are informing you of your current storage usage and your current shares.', [$this->productName])
 		);
 		$emailTemplate->addBodyText(
-			$this->l->t('We will also give you some tips and tricks on how to use %s during your daily life. You can learn how to download, move, share files, etc. on our <a href="https://docs.nextcloud.com/server/latest/user_manual/en/">first start documentation</a>.')
+			$this->l->t('We will also give you some tips and tricks on how to use %s during your daily life. You can learn how to download, move, share files, etc. on our <a href="https://docs.nextcloud.com/server/latest/user_manual/en/">first start documentation</a>.',
+				'We will also give you some tips and tricks on how to use %s during your daily life. You can learn how to download, move, share files, etc. on our [first start documentation](https://docs.nextcloud.com/server/latest/user_manual/en/).'
+			)
 		);
+	}
+
+	public function writeShareMessage(IEMailTemplate $emailTemplate, int $shareCount) {
+		if ($shareCount > 100) {
+			$emailTemplate->addBodyText(<<<EOF
+<div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
+	<h3 style="font-weight: bold">Freigaben</h3>
+	<p>Sie haben mehr als $shareCount Dateien freigegeben.</p>
+</div>
+EOF,
+				"Freigabeben\n\nSie haben mehr als $shareCount Dateien freigegeben."
+			);
+		} else if ($shareCount ===  0) {
+			$emailTemplate->addBodyText(<<<EOF
+<div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
+	<h3 style="font-weight: bold">Freigaben</h3>
+	<p>Sie haben keine Dateien freigegeben.</p>
+</div>
+EOF,
+				"Freigabeben\n\nSie haben kein Dateien freigegeben."
+			);
+		} else if ($shareCount ===  1) {
+			$emailTemplate->addBodyText(<<<EOF
+<div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
+	<h3 style="font-weight: bold">Freigaben</h3>
+	<p>Sie haben eine Datein freigegeben.</p>
+</div>
+EOF,
+				"Freigabeben\n\nSie haben eine Datei freigegeben."
+			);
+		}
 	}
 
 	public function writeOptOutMessage(IEMailTemplate $emailTemplate, NotificationTracker $trackedNotification) {
@@ -244,5 +279,15 @@ EOF,
 			$sendFromAddress,
 			$sendFromDomain
 		]);
+	}
+
+	public function writeGenericMessage(IEMailTemplate $emailTemplate, IUser $user, string $messageId): void {
+		$emailTemplate->addHeading('Hallo ' . $user->getDisplayName() . ',');
+
+		switch ($emailTemplate) {
+			case SendNotifications::NO_SHARE_AVAILABLE:
+				$emailTemplate->addBodyText('bisher haben Sie keine Dateien order Ordner freigegeben.');
+				$emailTemplate->addBodyText('Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste ');
+		}
 	}
 }
