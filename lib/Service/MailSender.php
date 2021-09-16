@@ -239,7 +239,9 @@ class MailSender {
 			]);
 		}
 
-		$trackedNotification->setLastSendNotification(time());
+		if ($trackedNotification !== null) {
+			$trackedNotification->setLastSendNotification(time());
+		}
 		$this->service->update($trackedNotification);
 	}
 
