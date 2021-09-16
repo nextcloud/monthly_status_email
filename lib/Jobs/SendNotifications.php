@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace OCA\MonthlyNotifications\Jobs;
 
 use OC\Files\View;
+use OCA\MonthlyNotifications\Db\NotificationTracker;
 use OCA\MonthlyNotifications\Service\MessageProvider;
 use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -117,129 +118,139 @@ class SendNotifications extends TimedJob {
 	 * @inheritDoc
 	 */
 	protected function run($argument): void {
-		$limit = (int)$this->config->getAppValue($this->appName, 'max_mail_sent', 1000);
+		$limit = (int)$this->config->getAppValue($this->appName, 'status-email-max-mail-sent', '1000');
 
 		// $trackedNotifications = $this->service->findAllOlderThan(new \DateTime("-1 month"), $limit);
-		// for debuging
+
+		// for debugging
 		$trackedNotifications = $this->service->findAllOlderThan(new \DateTime('now'), $limit);
 		foreach ($trackedNotifications as $trackedNotification) {
-			$message = $this->mailer->createMessage();
-			$user = $this->userManager->get($trackedNotification->getUserId());
-			$to = $user->getEMailAddress();
-			if ($to === null) {
-				// We don't have any email address, not sure what to do here.
-				$trackedNotification->setOptedOut(true);
-				continue;
-			}
-			$message->setFrom([$this->getFromAddress()]);
-			$message->setTo([$to]);
+			$this->processUser($trackedNotification);
+		}
+	}
 
-			$emailTemplate = $this->mailer->createEMailTemplate('quote.notification');
-			$emailTemplate->addHeader();
-			$emailTemplate->setSubject(strip_tags($this->entity) . ' Status-Mail');
+	private function processUser(NotificationTracker $trackedNotification) {
+		$message = $this->mailer->createMessage();
+		$user = $this->userManager->get($trackedNotification->getUserId());
+		$to = $user->getEMailAddress();
+		if ($to === null) {
+			// We don't have any email address, not sure what to do here.
+			$trackedNotification->setOptedOut(true);
+			// Try again next month
+			$trackedNotification->setLastSendNotification(time());
+			$this->service->update($trackedNotification);
+			return;
+		}
+		$message->setFrom([$this->getFromAddress()]);
+		$message->setTo([$to]);
 
-			// make sure FS is setup before querying storage related stuff...
-			\OC_Util::setupFS($user->getUID());
+		$emailTemplate = $this->mailer->createEMailTemplate('quote.notification');
+		$emailTemplate->addHeader();
+		$emailTemplate->setSubject(strip_tags($this->entity) . ' Status-Mail');
 
-			// Handle storage specific events
-			$storageInfo = \OC_Helper::getStorageInfo('/');
-			$stop = $this->provider->writeStorageUsage($emailTemplate, $storageInfo);
+		// make sure FS is setup before querying storage related stuff...
+		\OC_Util::setupFS($user->getUID());
 
-			if ($stop) {
-				$this->provider->writeClosing($emailTemplate);
-				$message->useTemplate($emailTemplate);
-				$this->mailer->send($message);
-				continue;
-			}
+		// Handle storage specific events
+		$storageInfo = \OC_Helper::getStorageInfo('/');
+		$stop = $this->provider->writeStorageUsage($emailTemplate, $storageInfo);
 
-			if ($trackedNotification->getOptedOut()) {
-				// People opting-out of the monthly emails should still get the
-				// 'urgent' email about the storage, but the rest shouldn't be
-				// sent.
-				continue;
-			}
+		if ($stop) {
+			$this->provider->writeClosing($emailTemplate);
+			$message->useTemplate($emailTemplate);
+			$this->mailer->send($message);
+			return;
+		}
 
-			// Handle no file upload
-			$view = new View('/' . $user->getUID() . '/files/');
-			$directoryContents = $view->getDirectoryContent('');
-			if (count($directoryContents) === 0) {
-				// No file/folder uploded
-				$this->provider->writeGenericMessage($emailTemplate, $user, self::NO_FILE_UPLOAD);
-				$this->provider->writeClosing($emailTemplate);
-				$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
-				$message->useTemplate($emailTemplate);
-				$this->mailer->send($message);
-				continue;
-			}
+		if ($trackedNotification->getOptedOut()) {
+			// People opting-out of the monthly emails should still get the
+			// 'urgent' email about the storage, but the rest shouldn't be
+			// sent.
+			return;
+		}
 
-			// Handle share specific events
-			$requestedShareTypes = [
-				IShare::TYPE_USER,
-				IShare::TYPE_GROUP,
-				IShare::TYPE_LINK,
-				IShare::TYPE_REMOTE,
-				IShare::TYPE_EMAIL,
-				IShare::TYPE_ROOM,
-				IShare::TYPE_CIRCLE,
-				IShare::TYPE_DECK,
-			];
-			$shareCount = 0;
-			foreach ($requestedShareTypes as $requestedShareType) {
-				$shares = $this->shareManager->getSharesBy(
-					$user->getUID(),
-					$requestedShareType,
-					null,
-					false,
-					100
-				);
-				$shareCount += count($shares);
-				if ($shareCount > 100) {
-					break; // don't
-				}
-			}
-
-			$this->provider->writeShareMessage($emailTemplate, $shareCount);
-
-			$availableGenericMessages = [self::TIP_DISCOVER_PARTNER, self::TIP_EMAIL_CENTER, self::TIP_FILE_RECOVERY, self::TIP_MORE_STORAGE];
-
-			if ($shareCount === 0) {
-				$availableGenericMessages[] = self::NO_SHARE_AVAILABLE;
-			}
-
-			// Handling of desktop/mobile client detection
-			$qb = $this->connection->getQueryBuilder();
-			$hasDesktopClientQuery = $qb->from('authtoken')
-				->select('name')
-				->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
-				->andWhere($qb->expr()->like('name', '%(Desktop Client -%'))
-				->setMaxResults(1);
-			$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
-
-			$hasMobileClientQuery = $qb->from('authtoken')
-				->select('name')
-				->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
-				->andWhere($qb->expr()->orX(
-					$qb->expr()->eq('name', 'Nextcloud-iOS'),
-					$qb->expr()->like('name', '%Nextcloud-android%'),
-				))
-				->setMaxResults(1);
-			$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
-
-			if (!$hasDesktopClientQuery && !$hasMobileClientQuery) {
-				$availableGenericMessages[] = self::NO_CLIENT_CONNECTION;
-			} elseif (!$hasMobileClientQuery) {
-				$availableGenericMessages[] = self::NO_MOBILE_CLIENT_CONNECTION;
-			} elseif (!$hasDesktopClientQuery) {
-				$availableGenericMessages[] = self::NO_DESKTOP_CLIENT_CONNECTION;
-			}
-
-			$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
+		// Handle no file upload
+		$view = new View('/' . $user->getUID() . '/files/');
+		$directoryContents = $view->getDirectoryContent('');
+		if (count($directoryContents) === 0) {
+			// No file/folder uploded
+			$this->provider->writeGenericMessage($emailTemplate, $user, self::NO_FILE_UPLOAD);
 			$this->provider->writeClosing($emailTemplate);
 			$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
 			$message->useTemplate($emailTemplate);
 			$this->mailer->send($message);
 			return;
 		}
+
+		// Handle share specific events
+		$requestedShareTypes = [
+			IShare::TYPE_USER,
+			IShare::TYPE_GROUP,
+			IShare::TYPE_LINK,
+			IShare::TYPE_REMOTE,
+			IShare::TYPE_EMAIL,
+			IShare::TYPE_ROOM,
+			IShare::TYPE_CIRCLE,
+			IShare::TYPE_DECK,
+		];
+		$shareCount = 0;
+		foreach ($requestedShareTypes as $requestedShareType) {
+			$shares = $this->shareManager->getSharesBy(
+				$user->getUID(),
+				$requestedShareType,
+				null,
+				false,
+				100
+			);
+			$shareCount += count($shares);
+			if ($shareCount > 100) {
+				break; // don't
+			}
+		}
+
+		$this->provider->writeShareMessage($emailTemplate, $shareCount);
+
+		$availableGenericMessages = [self::TIP_DISCOVER_PARTNER, self::TIP_EMAIL_CENTER, self::TIP_FILE_RECOVERY, self::TIP_MORE_STORAGE];
+
+		if ($shareCount === 0) {
+			$availableGenericMessages[] = self::NO_SHARE_AVAILABLE;
+		}
+
+		// Handling of desktop/mobile client detection
+		$qb = $this->connection->getQueryBuilder();
+		$hasDesktopClientQuery = $qb->from('authtoken')
+			->select('name')
+			->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
+			->andWhere($qb->expr()->like('name', '%(Desktop Client -%'))
+			->setMaxResults(1);
+		$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
+
+		$hasMobileClientQuery = $qb->from('authtoken')
+			->select('name')
+			->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
+			->andWhere($qb->expr()->orX(
+				$qb->expr()->eq('name', 'Nextcloud-iOS'),
+				$qb->expr()->like('name', '%Nextcloud-android%'),
+			))
+			->setMaxResults(1);
+		$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
+
+		if (!$hasDesktopClientQuery && !$hasMobileClientQuery) {
+			$availableGenericMessages[] = self::NO_CLIENT_CONNECTION;
+		} elseif (!$hasMobileClientQuery) {
+			$availableGenericMessages[] = self::NO_MOBILE_CLIENT_CONNECTION;
+		} elseif (!$hasDesktopClientQuery) {
+			$availableGenericMessages[] = self::NO_DESKTOP_CLIENT_CONNECTION;
+		}
+
+		$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
+		$this->provider->writeClosing($emailTemplate);
+		$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
+		$message->useTemplate($emailTemplate);
+		$this->mailer->send($message);
+
+		$trackedNotification->setLastSendNotification(time());
+		$this->service->update($trackedNotification);
 	}
 
 	private function getFromAddress():string {

@@ -144,4 +144,8 @@ class NotificationTrackerService {
 			$this->handleException($e);
 		}
 	}
+
+	public function update(NotificationTracker $notificationTracker) {
+		$this->mapper->update($notificationTracker);
+	}
 }

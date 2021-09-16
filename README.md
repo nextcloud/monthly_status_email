@@ -17,6 +17,19 @@ You can then edit your config.php to tell this app to use your MessageProvider i
 ]
 ```
 
+## Mail sending limits
+
+This app will try to spread out as much as possible the amount of mails sent at the same
+time and will send them per batch each hour with a maximum of 1000 per hour. This limits
+can be changed with the `status-email-max-mail-sent`.
+
+```php
+[
+    ...,
+    'status-email-max-mail-sent' => '10000'
+]
+```
+
 ## Licensing
 
 This project is licensed under AGPL-3.0-or-later.

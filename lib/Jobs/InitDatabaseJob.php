@@ -61,6 +61,5 @@ class InitDatabaseJob extends QueuedJob {
 				// Already existing entry => ignore
 			}
 		});
-
 	}
 }
