@@ -22,6 +22,8 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace OCA\MonthlyStatusEmail\Service;
 
 class NotFoundException extends ServiceException {

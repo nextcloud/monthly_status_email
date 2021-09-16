@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @copyright Copyright (c) 2021 Carl Schwan <carl@carlschwan.eu>
  *
@@ -23,6 +21,8 @@ declare(strict_types=1);
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Jobs;
 

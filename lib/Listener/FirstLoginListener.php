@@ -22,6 +22,8 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace OCA\MonthlyStatusEmail\Listener;
 
 use OCA\MonthlyStatusEmail\Service\MessageProvider;

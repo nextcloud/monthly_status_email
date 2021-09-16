@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @copyright Copyright (c) 2021 Carl Schwan <carl@carlschwan.eu>
  *
@@ -22,12 +20,13 @@ declare(strict_types=1);
  *
  */
 
+declare(strict_types=1);
+
 namespace OCA\MonthlyStatusEmail\Controller;
 
 use OCA\MonthlyStatusEmail\Service\NotFoundException;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
