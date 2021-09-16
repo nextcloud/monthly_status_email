@@ -30,6 +30,7 @@ use OC\Files\View;
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
 use OCA\MonthlyStatusEmail\Service\ClientDetector;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
+use OCA\MonthlyStatusEmail\Service\NoFileUploadedDetector;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
@@ -102,6 +103,10 @@ class SendNotifications extends TimedJob {
 	 * @var LoggerInterface
 	 */
 	private $logger;
+	/**
+	 * @var NoFileUploadedDetector
+	 */
+	private $noFileUploadedDetector;
 
 	public function __construct(
 		$appName,
@@ -114,10 +119,11 @@ class SendNotifications extends TimedJob {
 		IDBConnection $connection,
 		IManager $shareManager,
 		ClientDetector $clientDetector,
-		LoggerInterface $logger
+		LoggerInterface $logger,
+		NoFileUploadedDetector $noFileUploadedDetector
 	) {
 		parent::__construct($time);
-		$this->setInterval(60 * 60); // every hour
+		$this->setInterval(0); // 60 * 60); // every hour
 		$this->service = $service;
 		$this->userManager = $userManager;
 		$this->config = $config;
@@ -130,6 +136,7 @@ class SendNotifications extends TimedJob {
 		$this->connection = $connection;
 		$this->clientDetector = $clientDetector;
 		$this->logger = $logger;
+		$this->noFileUploadedDetector = $noFileUploadedDetector;
 	}
 
 	/**
@@ -187,9 +194,7 @@ class SendNotifications extends TimedJob {
 		}
 
 		// Handle no file upload
-		$view = new View('/' . $user->getUID() . '/files/');
-		$directoryContents = $view->getDirectoryContent('');
-		if (count($directoryContents) === 0) {
+		if ($this->noFileUploadedDetector->hasNotUploadedFiles($user)) {
 			// No file/folder uploaded
 			$this->provider->writeGenericMessage($emailTemplate, $user, self::NO_FILE_UPLOAD);
 			$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);

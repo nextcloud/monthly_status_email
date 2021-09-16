@@ -127,8 +127,8 @@ class MessageProvider {
 				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
-		<td>
-			<span style="font-size: 35px">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+		<td style="padding-right: 20px; text-align: center">
+			<span style="font-size: 35px">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
 		</td>
 		<td>
 			<h3 style="font-weight: bold">Speicherplatz</h3>
@@ -147,10 +147,10 @@ EOF,
 				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
-		<td>
-			<span style="font-size: 35px">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+		<td style="padding-right: 20px; text-align: center">
+			<span style="font-size: 35px">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
 			<hr />
-			<span style="font-size: 35px">$quota[0]</span> <span style="font-size: larger">$quota[1]</span>
+			<span style="font-size: 35px">$quota[0]</span>&nbsp;<span style="font-size: larger">$quota[1]</span>
 		</td>
 		<td>
 			<h3 style="font-weight: bold">Speicherplatz</h3>
@@ -169,10 +169,10 @@ EOF,
 				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
-		<td>
-			<span style="font-size: 35px; color: orange">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+		<td style="padding-right: 20px; text-align: center">
+			<span style="font-size: 35px; color: orange">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
 			<hr />
-			<span style="font-size: 35px">$quota[0]</span> <span style="font-size: larger">$quota[1]</span>
+			<span style="font-size: 35px">$quota[0]</span>&nbsp;<span style="font-size: larger">$quota[1]</span>
 		</td>
 		<td>
 			<h3 style="font-weight: bold">Speicherplatz</h3>
@@ -195,10 +195,10 @@ EOF,
 				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
-		<td>
-			<span style="font-size: 35px; color: red">$usedSpace[0]</span> <span style="font-size: larger">$usedSpace[1]</span>
+		<td style="padding-right: 20px; text-align: center">
+			<span style="font-size: 35px; color: red">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
 			<hr />
-			<span style="font-size: 35px">$quota[0]</span> <span style="font-size: larger">$quota[1]</span>
+			<span style="font-size: 35px">$quota[0]</span>&nbsp;<span style="font-size: larger">$quota[1]</span>
 		</td>
 		<td>
 			<h3 style="font-weight: bold">Speicherplatz</h3>
