@@ -77,9 +77,6 @@ class InitialEmailTest extends TestCase {
 	public function testUserNoEmail() {
 		$user = $this->createMock(IUser::class);
 		$user->expects($this->once())
-			->method('getUid')
-			->willReturn('user1');
-		$user->expects($this->once())
 			->method('getEmailAddress')
 			->willReturn(null);
 
