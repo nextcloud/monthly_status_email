@@ -114,7 +114,8 @@ class InitialEmailTest extends TestCase {
 
 		$this->mailer->expects($this->once())
 			->method('createEmailTemplate')
-			->withAnyParameters();
+			->withAnyParameters()
+			->willReturn($template);
 
 		$this->provider->expects($this->once())
 			->method('writeOptOutMessage')

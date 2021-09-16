@@ -102,7 +102,6 @@ class MailSenderTest extends TestCase {
 		$this->storageInfoProvider = $this->createMock(StorageInfoProvider::class);
 
 		$this->mailSender = new MailSender(
-			'monthly_status_email',
 			$this->service,
 			$this->userManager,
 			$this->config,
@@ -146,7 +145,8 @@ class MailSenderTest extends TestCase {
 
 		$this->mailer->expects($this->once())
 			->method('createEmailTemplate')
-			->withAnyParameters();
+			->withAnyParameters()
+			->willReturn($template);
 
 		$this->provider->expects($this->once())
 			->method('writeOptOutMessage')
