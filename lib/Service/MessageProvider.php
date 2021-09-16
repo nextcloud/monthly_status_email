@@ -125,12 +125,12 @@ class MessageProvider {
 	}
 
 	/**
+	 * Storage used at more than 99%.
+	 *
 	 * @param IEMailTemplate $emailTemplate
 	 * @param array $storageInfo
-	 * @return bool True if we should stop processing the condition after calling
-	 * this method.
 	 */
-	public function writeStorageUsage(IEMailTemplate $emailTemplate, array $storageInfo): bool {
+	public function writeStorageFull(IEMailTemplate $emailTemplate, array $storageInfo): void {
 		$quota = $this->humanFileSize($storageInfo['quota']);
 		$usedSpace = $this->humanFileSize($storageInfo['used']);
 
@@ -139,34 +139,13 @@ class MessageProvider {
 			$requestMoreStorageLink = '<p>' . $requestMoreStorageLink . '</p>';
 		}
 
-		if ($storageInfo['quota'] === FileInfo::SPACE_UNLIMITED) {
-			// Message no quota
-			$emailTemplate->addBodyText(
-				<<<EOF
+		// Warning no storage left
+		$emailTemplate->addBodyText(
+			<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td style="padding-right: 20px; text-align: center">
-			<span style="font-size: 35px">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
-		</td>
-		<td>
-			<h3 style="font-weight: bold">Speicherplatz</h3>
-			<p>Sie nutzen im Moment $usedSpace[0] $usedSpace[1].</p>
-			$requestMoreStorageLink
-		</td>
-	</tr>
-</table>
-EOF,
-				"Speicherplatz\n\nSie nutzen im Moment $usedSpace"
-			);
-			return false;
-		} elseif ($storageInfo['usage_relative'] < 90) {
-			// Message quota but less than 90% used
-			$emailTemplate->addBodyText(
-				<<<EOF
-<table style="background-color: #f8f8f8; padding: 20px; width: 100%">
-	<tr>
-		<td style="padding-right: 20px; text-align: center">
-			<span style="font-size: 35px">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
+			<span style="font-size: 35px; color: red">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
 			<hr />
 			<span style="font-size: 35px">$quota[0]</span>&nbsp;<span style="font-size: larger">$quota[1]</span>
 		</td>
@@ -174,17 +153,29 @@ EOF,
 			<h3 style="font-weight: bold">Speicherplatz</h3>
 			<p>Sie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1].</p>
 			$requestMoreStorageLink
-		</td>
+		</td>a
 	</tr>
 </table>
 EOF,
-				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
-			);
-			return false;
-		} elseif ($storageInfo['usage_relative'] < 99) {
-			// Warning almost no storage left
-			$emailTemplate->addBodyText(
-				<<<EOF
+			"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
+		);
+		$emailTemplate->addHeading('Hallo,');
+		$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+		$this->writeClosing($emailTemplate);
+		$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
+	}
+
+	public function writeStorageWarning(IEMailTemplate $emailTemplate, array $storageInfo): void {
+		$quota = $this->humanFileSize($storageInfo['quota']);
+		$usedSpace = $this->humanFileSize($storageInfo['used']);
+
+		$requestMoreStorageLink = $this->getRequestMoreStorageLink();
+		if ($requestMoreStorageLink !== '') {
+			$requestMoreStorageLink = '<p>' . $requestMoreStorageLink . '</p>';
+		}
+		// Warning almost no storage left
+		$emailTemplate->addBodyText(
+			<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td style="padding-right: 20px; text-align: center">
@@ -200,21 +191,50 @@ EOF,
 	</tr>
 </table>
 EOF,
-				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
-			);
-			$emailTemplate->addHeading('Hallo,');
-			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist fast vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
-			$this->writeClosing($emailTemplate);
-			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
-			return true;
-		} else {
-			// Warning no storage left
-			$emailTemplate->addBodyText(
-				<<<EOF
+			"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
+		);
+		$emailTemplate->addHeading('Hallo,');
+		$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist fast vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
+		$this->writeClosing($emailTemplate);
+		$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
+	}
+
+	public function writeStorageNoQuota(IEMailTemplate $emailTemplate, array $storageInfo): void {
+		$usedSpace = $this->humanFileSize($storageInfo['used']);
+		// Message no quota
+		$emailTemplate->addBodyText(
+			<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td style="padding-right: 20px; text-align: center">
-			<span style="font-size: 35px; color: red">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
+			<span style="font-size: 35px">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
+		</td>
+		<td>
+			<h3 style="font-weight: bold">Speicherplatz</h3>
+			<p>Sie nutzen im Moment $usedSpace[0] $usedSpace[1].</p>
+		</td>
+	</tr>
+</table>
+EOF,
+			"Speicherplatz\n\nSie nutzen im Moment $usedSpace"
+		);
+	}
+
+	public function writeStorageSpaceLeft(IEMailTemplate $emailTemplate, array $storageInfo): void {
+		$quota = $this->humanFileSize($storageInfo['quota']);
+		$usedSpace = $this->humanFileSize($storageInfo['used']);
+
+		$requestMoreStorageLink = $this->getRequestMoreStorageLink();
+		if ($requestMoreStorageLink !== '') {
+			$requestMoreStorageLink = '<p>' . $requestMoreStorageLink . '</p>';
+		}
+
+		$emailTemplate->addBodyText(
+			<<<EOF
+<table style="background-color: #f8f8f8; padding: 20px; width: 100%">
+	<tr>
+		<td style="padding-right: 20px; text-align: center">
+			<span style="font-size: 35px">$usedSpace[0]</span>&nbsp;<span style="font-size: larger">$usedSpace[1]</span>
 			<hr />
 			<span style="font-size: 35px">$quota[0]</span>&nbsp;<span style="font-size: larger">$quota[1]</span>
 		</td>
@@ -226,14 +246,8 @@ EOF,
 	</tr>
 </table>
 EOF,
-				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
-			);
-			$emailTemplate->addHeading('Hallo,');
-			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
-			$this->writeClosing($emailTemplate);
-			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
-			return true;
-		}
+			"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
+		);
 	}
 
 	public function writeWelcomeMail(IEMailTemplate $emailTemplate, string $name): void {

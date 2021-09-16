@@ -25,12 +25,10 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Service;
 
+use OC\Files\FileInfo;
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
-use OCA\Talk\Model\Message;
-use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\DB\Exception;
 use OCP\IConfig;
-use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\IUser;
 use OCP\IUserManager;
@@ -89,9 +87,12 @@ class MailSender {
 	 * @var NoFileUploadedDetector
 	 */
 	private $noFileUploadedDetector;
+	/**
+	 * @var StorageInfoProvider
+	 */
+	private $storageInfoProvider;
 
 	public function __construct(
-		$appName,
 		NotificationTrackerService $service,
 		IUserManager $userManager,
 		IConfig $config,
@@ -100,12 +101,12 @@ class MailSender {
 		IManager $shareManager,
 		ClientDetector $clientDetector,
 		LoggerInterface $logger,
-		NoFileUploadedDetector $noFileUploadedDetector
+		NoFileUploadedDetector $noFileUploadedDetector,
+		StorageInfoProvider $storageInfoProvider
 	) {
 		$this->service = $service;
 		$this->userManager = $userManager;
 		$this->config = $config;
-		$this->appName = $appName;
 		$this->mailer = $mailer;
 		$this->l = $l;
 		$this->shareManager = $shareManager;
@@ -114,6 +115,7 @@ class MailSender {
 		$this->clientDetector = $clientDetector;
 		$this->logger = $logger;
 		$this->noFileUploadedDetector = $noFileUploadedDetector;
+		$this->storageInfoProvider = $storageInfoProvider;
 	}
 
 	private function setUpMail(IMessage $message, NotificationTracker $trackedNotification, IUser $user): ?IEMailTemplate {
@@ -135,6 +137,32 @@ class MailSender {
 		return $emailTemplate;
 	}
 
+	/**
+	 * @param IEMailTemplate $emailTemplate
+	 * @param IUser $user
+	 * @return bool True if we should stop processing the condition after calling
+	 * this method.
+	 */
+	private function handleStorage(IEMailTemplate $emailTemplate, IUser $user): bool {
+		$storageInfo = $this->storageInfoProvider->getStorageInfo($user);
+		if ($storageInfo['quota'] === FileInfo::SPACE_UNLIMITED) {
+			// Message no quota
+			$this->provider->writeStorageNoQuota($emailTemplate, $storageInfo);
+			return false;
+		} elseif ($storageInfo['usage_relative'] < 90) {
+			// Message quota but less than 90% used
+			$this->provider->writeStorageSpaceLeft($emailTemplate, $storageInfo);
+			return false;
+		} elseif ($storageInfo['usage_relative'] < 99) {
+			$this->provider->writeStorageWarning($emailTemplate, $storageInfo);
+			return true;
+		} else {
+			$this->provider->writeStorageFull($emailTemplate, $storageInfo);
+			return true;
+		}
+	}
+
+
 	public function sendMonthlyMailTo(NotificationTracker $trackedNotification) {
 		$message = $this->mailer->createMessage();
 		$user = $this->userManager->get($trackedNotification->getUserId());
@@ -143,12 +171,8 @@ class MailSender {
 			return;
 		}
 
-		// make sure FS is setup before querying storage related stuff...
-		\OC_Util::setupFS($user->getUID());
-
 		// Handle storage specific events
-		$storageInfo = \OC_Helper::getStorageInfo('/');
-		$stop = $this->provider->writeStorageUsage($emailTemplate, $storageInfo);
+		$stop = $this->handleStorage($emailTemplate, $user);
 
 		if ($stop) {
 			// Urgent storage warning, show it and don't display anything else
