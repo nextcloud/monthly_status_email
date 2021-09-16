@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @copyright Copyright (c) 2021 Carl Schwan <carl@carlschwan.eu>
  *
@@ -24,16 +23,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\MonthlyStatusEmail\Jobs;
+namespace OCA\MonthlyStatusEmail\Service;
 
-use OC\Files\View;
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
-use OCA\MonthlyStatusEmail\Service\ClientDetector;
-use OCA\MonthlyStatusEmail\Service\MessageProvider;
-use OCA\MonthlyStatusEmail\Service\NoFileUploadedDetector;
-use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
+use OCA\Talk\Model\Message;
 use OCP\AppFramework\Utility\ITimeFactory;
-use OCP\BackgroundJob\TimedJob;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -47,18 +41,12 @@ use OCP\Share\IManager;
 use OCP\Share\IShare;
 use Psr\Log\LoggerInterface;
 
-class SendNotifications extends TimedJob {
-	public const NO_SHARE_AVAILABLE = 0;
-	public const NO_CLIENT_CONNECTION = 1;
-	public const NO_MOBILE_CLIENT_CONNECTION = 2;
-	public const NO_DESKTOP_CLIENT_CONNECTION = 3;
-	public const RECOMMEND_NEXTCLOUD = 4;
-	public const TIP_FILE_RECOVERY = 5;
-	public const TIP_EMAIL_CENTER = 6;
-	public const TIP_MORE_STORAGE = 7;
-	public const TIP_DISCOVER_PARTNER = 8;
-	public const NO_FILE_UPLOAD = 9;
-	public const NO_EMAIL_UPLOAD = 10;
+/**
+ * Class MailSender
+ *
+ * @package OCA\MonthlyStatusEmail\Service
+ */
+class MailSender {
 
 	/** @var NotificationTrackerService $service */
 	private $service;
@@ -69,8 +57,6 @@ class SendNotifications extends TimedJob {
 	/** @var IConfig $config */
 	private $config;
 
-	/** @var string $appName */
-	private $appName;
 	/**
 	 * @var IMailer
 	 */
@@ -92,10 +78,6 @@ class SendNotifications extends TimedJob {
 	 */
 	private $provider;
 	/**
-	 * @var IDBConnection
-	 */
-	private $connection;
-	/**
 	 * @var ClientDetector
 	 */
 	private $clientDetector;
@@ -110,20 +92,16 @@ class SendNotifications extends TimedJob {
 
 	public function __construct(
 		$appName,
-		ITimeFactory $time,
 		NotificationTrackerService $service,
 		IUserManager $userManager,
 		IConfig $config,
 		IMailer $mailer,
 		IL10N $l,
-		IDBConnection $connection,
 		IManager $shareManager,
 		ClientDetector $clientDetector,
 		LoggerInterface $logger,
 		NoFileUploadedDetector $noFileUploadedDetector
 	) {
-		parent::__construct($time);
-		$this->setInterval(0); // 60 * 60); // every hour
 		$this->service = $service;
 		$this->userManager = $userManager;
 		$this->config = $config;
@@ -133,30 +111,12 @@ class SendNotifications extends TimedJob {
 		$this->shareManager = $shareManager;
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
 		$this->provider = \OC::$server->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
-		$this->connection = $connection;
 		$this->clientDetector = $clientDetector;
 		$this->logger = $logger;
 		$this->noFileUploadedDetector = $noFileUploadedDetector;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	protected function run($argument): void {
-		$limit = (int)$this->config->getAppValue($this->appName, 'status-email-max-mail-sent', '1000');
-
-		// $trackedNotifications = $this->service->findAllOlderThan(new \DateTime("-1 month"), $limit);
-
-		// for debugging
-		$trackedNotifications = $this->service->findAllOlderThan(new \DateTime('now'), $limit);
-		foreach ($trackedNotifications as $trackedNotification) {
-			$this->processUser($trackedNotification);
-		}
-	}
-
-	private function processUser(NotificationTracker $trackedNotification) {
-		$message = $this->mailer->createMessage();
-		$user = $this->userManager->get($trackedNotification->getUserId());
+	private function setUpMail(IMessage $message, NotificationTracker $trackedNotification, IUser $user): ?IEMailTemplate {
 		$to = $user->getEMailAddress();
 		if ($to === null) {
 			// We don't have any email address, not sure what to do here.
@@ -164,7 +124,7 @@ class SendNotifications extends TimedJob {
 			// Try again next month
 			$trackedNotification->setLastSendNotification(time());
 			$this->service->update($trackedNotification);
-			return;
+			return null;
 		}
 		$message->setFrom([$this->getFromAddress()]);
 		$message->setTo([$to]);
@@ -172,6 +132,16 @@ class SendNotifications extends TimedJob {
 		$emailTemplate = $this->mailer->createEMailTemplate('quote.notification');
 		$emailTemplate->addHeader();
 		$emailTemplate->setSubject(strip_tags($this->entity) . ' Status-Mail');
+		return $emailTemplate;
+	}
+
+	public function sendMonthlyMailTo(NotificationTracker $trackedNotification) {
+		$message = $this->mailer->createMessage();
+		$user = $this->userManager->get($trackedNotification->getUserId());
+		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
+		if ($emailTemplate === null) {
+			return;
+		}
 
 		// make sure FS is setup before querying storage related stuff...
 		\OC_Util::setupFS($user->getUID());
@@ -196,7 +166,7 @@ class SendNotifications extends TimedJob {
 		// Handle no file upload
 		if ($this->noFileUploadedDetector->hasNotUploadedFiles($user)) {
 			// No file/folder uploaded
-			$this->provider->writeGenericMessage($emailTemplate, $user, self::NO_FILE_UPLOAD);
+			$this->provider->writeGenericMessage($emailTemplate, $user, MessageProvider::NO_FILE_UPLOAD);
 			$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
 			return;
 		}
@@ -206,10 +176,10 @@ class SendNotifications extends TimedJob {
 		$this->provider->writeShareMessage($emailTemplate, $shareCount);
 
 		// Add tips to randomly selected messages
-		$availableGenericMessages = [self::TIP_DISCOVER_PARTNER, self::TIP_EMAIL_CENTER, self::TIP_FILE_RECOVERY, self::TIP_MORE_STORAGE];
+		$availableGenericMessages = [MessageProvider::TIP_DISCOVER_PARTNER, MessageProvider::TIP_EMAIL_CENTER, MessageProvider::TIP_FILE_RECOVERY, MessageProvider::TIP_MORE_STORAGE];
 
 		if ($shareCount === 0) {
-			$availableGenericMessages[] = self::NO_SHARE_AVAILABLE;
+			$availableGenericMessages[] = MessageProvider::NO_SHARE_AVAILABLE;
 		}
 
 		// Handle desktop/mobile client connection detection
@@ -220,8 +190,19 @@ class SendNotifications extends TimedJob {
 		$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
 	}
 
+	public function sendStatusEmailActivation(IUser $user, NotificationTracker $trackedNotification): void {
+		$message = $this->mailer->createMessage();
+		$user = $this->userManager->get($trackedNotification->getUserId());
+		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
+		if ($emailTemplate === null) {
+			return;
+		}
+
+		$this->provider->writeWelcomeMail($emailTemplate, $user->getDisplayName());
+		$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
+	}
+
 	private function sendEmail(IEMailTemplate $template, IUser $user, IMessage $message, ?NotificationTracker $trackedNotification = null): void {
-		$this->provider->writeClosing($template);
 		if ($trackedNotification !== null) {
 			$this->provider->writeOptOutMessage($template, $trackedNotification);
 		}
@@ -280,11 +261,11 @@ class SendNotifications extends TimedJob {
 		$availableGenericMessages = [];
 
 		if (!$hasDesktopClient && !$hasMobileClient) {
-			$availableGenericMessages[] = self::NO_CLIENT_CONNECTION;
+			$availableGenericMessages[] = MessageProvider::NO_CLIENT_CONNECTION;
 		} elseif (!$hasMobileClient) {
-			$availableGenericMessages[] = self::NO_MOBILE_CLIENT_CONNECTION;
+			$availableGenericMessages[] = MessageProvider::NO_MOBILE_CLIENT_CONNECTION;
 		} elseif (!$hasDesktopClient) {
-			$availableGenericMessages[] = self::NO_DESKTOP_CLIENT_CONNECTION;
+			$availableGenericMessages[] = MessageProvider::NO_DESKTOP_CLIENT_CONNECTION;
 		}
 		return $availableGenericMessages;
 	}

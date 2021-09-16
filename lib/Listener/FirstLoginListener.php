@@ -29,6 +29,7 @@ namespace OCA\MonthlyStatusEmail\Listener;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NotFoundException;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
+use OCP\IServerContainer;
 use OCP\IUser;
 use OCP\IConfig;
 use OCP\Mail\IMailer;
@@ -43,11 +44,16 @@ class FirstLoginListener {
 	 * @var MessageProvider
 	 */
 	private $provider;
+	/**
+	 * @var string
+	 */
+	private $entity;
 
-	public function __construct(IMailer $mailer, NotificationTrackerService $service, IConfig $config) {
+	public function __construct(IMailer $mailer, NotificationTrackerService $service, IConfig $config, IServerContainer $container) {
 		$this->mailer = $mailer;
 		$this->service = $service;
-		$this->provider = \OC::$server->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
+		$this->entity = strip_tags($config->getAppValue('theming', 'name', 'Nextcloud'));
+		$this->provider = $container->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
 	}
 
 	/**
@@ -56,18 +62,20 @@ class FirstLoginListener {
 	 * @throws NotFoundException
 	 */
 	public function handle(IUser $user): void {
-		$message = $this->mailer->createMessage();
 		$to = $user->getEMailAddress();
 		if ($to === null) {
 			// We don't have any email address ignore the users. We can't send
 			// mails to them.
 			return;
 		}
+
+		$message = $this->mailer->createMessage();
 		$trackedNotification = $this->service->find($user->getUID());
 		$message->setFrom([$this->provider->getFromAddress()]);
 		$message->setTo([$to]);
 
 		$emailTemplate = $this->mailer->createEMailTemplate('welcome.mail');
+		$emailTemplate->setSubject(strip_tags($this->entity) . ' Status-Mail');
 		$emailTemplate->addHeader();
 
 		$this->provider->writeWelcomeMail($emailTemplate, $user->getDisplayName());

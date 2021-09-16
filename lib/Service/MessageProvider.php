@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace OCA\MonthlyStatusEmail\Service;
 
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
-use OCA\MonthlyStatusEmail\Jobs\SendNotifications;
+use OCA\MonthlyStatusEmail\Jobs\SendNotificationsJob;
 use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;
@@ -36,6 +36,18 @@ use OCP\IUser;
 use OCP\Mail\IEMailTemplate;
 
 class MessageProvider {
+	public const NO_SHARE_AVAILABLE = 0;
+	public const NO_CLIENT_CONNECTION = 1;
+	public const NO_MOBILE_CLIENT_CONNECTION = 2;
+	public const NO_DESKTOP_CLIENT_CONNECTION = 3;
+	public const RECOMMEND_NEXTCLOUD = 4;
+	public const TIP_FILE_RECOVERY = 5;
+	public const TIP_EMAIL_CENTER = 6;
+	public const TIP_MORE_STORAGE = 7;
+	public const TIP_DISCOVER_PARTNER = 8;
+	public const NO_FILE_UPLOAD = 9;
+	public const NO_EMAIL_UPLOAD = 10;
+
 	/**
 	 * @var string
 	 */
@@ -48,6 +60,10 @@ class MessageProvider {
 	 * @var IConfig
 	 */
 	private $config;
+	/**
+	 * @var string
+	 */
+	private $entity;
 
 	public function __construct(IConfig $config, IURLGenerator $generator) {
 		$this->productName = $config->getAppValue('theming', 'productName', 'Nextcloud');
@@ -188,8 +204,8 @@ EOF,
 			);
 			$emailTemplate->addHeading('Hallo,');
 			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist fast vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
-			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
 			$this->writeClosing($emailTemplate);
+			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
 			return true;
 		} else {
 			// Warning no storage left
@@ -214,8 +230,8 @@ EOF,
 			);
 			$emailTemplate->addHeading('Hallo,');
 			$emailTemplate->addBodyText('Ihr Speicherplatz in der ' . $this->entity . ' ist vollständing belegt. Sie können Ihren Speicherplatz jederzeit kostenpflichtig erweitern und dabei zwischen verschiedenen Speichergrößen wählen.');
-			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
 			$this->writeClosing($emailTemplate);
+			$emailTemplate->addBodyButton('Jetzt Speicher erweitern', 'TODO');
 			return true;
 		}
 	}
@@ -291,18 +307,19 @@ EOF,
 		$home = $this->generator->getAbsoluteURL('/');
 
 		switch ($messageId) {
-			case SendNotifications::NO_SHARE_AVAILABLE:
+			case self::NO_SHARE_AVAILABLE:
 				$emailTemplate->addBodyText('bisher haben Sie keine Dateien order Ordner freigegeben.');
 				$emailTemplate->addBodyText(
 					'Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste Momente jetzt ganz einfach mit Ihren Liebsten. Dies funktioniert ohne den umständlichen Austausch von Datenträgern. Auch Datein, die für einen E-Mail-Anhang zu groß sind, können Sie mit Ihrer ' . $this->entity . ' anderen bequem per Link zur Verfügung stellen.',
 					'Hochzeiten, Familienfeiern, gemeinsam verbrachte Urlaube - teilen Sie Ihre schönste Momente jetzt ganz einfach mit Ihren Liebsten. Dies funktioniert ohne den umständlichen Austausch von Datenträgern. Auch Datein, die für einen E-Mail-Anhang zu groß sind, können Sie mit Ihrer ' . strip_tags($this->entity) . ' anderen bequem per Link zur Verfügung stellen.'
 				);
+				$this->writeClosing($template);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
-			case SendNotifications::NO_DESKTOP_CLIENT_CONNECTION:
-			case SendNotifications::NO_MOBILE_CLIENT_CONNECTION:
-			case SendNotifications::NO_CLIENT_CONNECTION:
+			case self::NO_DESKTOP_CLIENT_CONNECTION:
+			case self::NO_MOBILE_CLIENT_CONNECTION:
+			case self::NO_CLIENT_CONNECTION:
 				// TODO different message depending on if mobile, desktop or both apps weren't
 				// used yet.
 				// WARNING There might be some false positive in case an user renamed their devices
@@ -315,33 +332,45 @@ EOF,
 					'Nach Download des kostenlose Software wird Ihre ' . $this->entity . ' als Ordner auf Ihrem Windows PC oder Mac angelegt. Alle Dateien, die Sie in diesen Ordner verschieben, werden automatisch mit Ihrer Cloud synchronisiert - so bleibt alles auf dem aktuellsten Stand. Öffnen Sie die Dateien aus Ihrer ' . $this->entity . ' mit Ihren gewohnten Anwendungen (z.B. Office) und machen Sie Äanderungen blitzschnell auf allen Geräten verfügbar.',
 					'Nach Download des kostenlose Software wird Ihre ' . strip_tags($this->entity) . ' als Ordner auf Ihrem Windows PC oder Mac angelegt. Alle Dateien, die Sie in diesen Ordner verschieben, werden automatisch mit Ihrer Cloud synchronisiert - so bleibt alles auf dem aktuellsten Stand. Öffnen Sie die Dateien aus Ihrer ' . strip_tags($this->entity) . ' mit Ihren gewohnten Anwendungen (z.B. Office) und machen Sie Äanderungen blitzschnell auf allen Geräten verfügbar.'
 				);
+				$this->writeClosing($template);
 				$emailTemplate->addBodyButton('Zur ' . $this->productName . ' Sync Software', 'TODO', 'Zur ' . strip_tags($this->productName) . ' Sync Software');
-			return;
+				return;
 
-			case SendNotifications::NO_FILE_UPLOAD:
+			case self::NO_FILE_UPLOAD:
 				$emailTemplate->addBodyText('TODO message to send then there is no file uploded');
+				$this->writeClosing($template);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
-			case SendNotifications::TIP_MORE_STORAGE:
+			case self::TIP_MORE_STORAGE:
 				$emailTemplate->addBodyText('TODO message to advertise how to increase the storage outside of the out of storage place situation');
+				$this->writeClosing($template);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
-			case SendNotifications::TIP_DISCOVER_PARTNER:
+			case self::TIP_DISCOVER_PARTNER:
 				$emailTemplate->addBodyText('TODO message to advertise partners');
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
-			case SendNotifications::TIP_FILE_RECOVERY:
+			case self::TIP_FILE_RECOVERY:
 				$emailTemplate->addBodyText('TODO message to explain how to recover data');
+				$this->writeClosing($template);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
 
-			case SendNotifications::TIP_EMAIL_CENTER:
+			case self::TIP_EMAIL_CENTER:
 				$emailTemplate->addBodyText('TODO message to explain the email center');
+				$this->writeClosing($template);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
+
+			case self::RECOMMEND_NEXTCLOUD:
+				$emailTemplate->addBodyText('TODO recommand service to family/friends');
+				$this->writeClosing($template);
+				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
+				return;
+
 		}
 	}
 }

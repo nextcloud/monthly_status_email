@@ -30,7 +30,9 @@ use OCA\MonthlyStatusEmail\Listener\FirstLoginListener;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\IConfig;
+use OCP\IServerContainer;
 use OCP\IUser;
+use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
 use Test\TestCase;
 
@@ -47,6 +49,10 @@ class InitialEmailTest extends TestCase {
 	 * @var FirstLoginListener
 	 */
 	private $firstLoginListener;
+	/**
+	 * @var MessageProvider|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $provider;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -54,6 +60,7 @@ class InitialEmailTest extends TestCase {
 		$this->mailer = $this->createMock(IMailer::class);
 		$this->service = $this->createMock(NotificationTrackerService::class);
 		$this->config = $this->createMock(IConfig::class);
+		$this->container = $this->createMock(IServerContainer::class);
 		$this->config->expects($this->any())
 			->method('getSystemValueString')
 			->willReturnCallback(function ($key, $default) use ($config) {
@@ -63,7 +70,17 @@ class InitialEmailTest extends TestCase {
 					return $config->getSystemValueString($key, $default);
 				}
 			});
-		$this->firstLoginListener = new FirstLoginListener($this->mailer, $this->service, $this->config);
+		$this->provider = $this->createMock(MessageProvider::class);
+		$this->container->expects($this->any())
+			->method('get')
+			->willReturnCallback(function ($class) {
+				if ($class === MessageProvider::class) {
+					return $this->provider;
+				} else {
+					return \OC::$server->get($class);
+				}
+			});
+		$this->firstLoginListener = new FirstLoginListener($this->mailer, $this->service, $this->config, $this->container);
 	}
 
 	public function testUserNoEmail() {
@@ -75,7 +92,7 @@ class InitialEmailTest extends TestCase {
 			->method('getEmailAddress')
 			->willReturn(null);
 
-		$this->service->method($this->never())
+		$this->service->expects($this->never())
 			->method('find');
 
 		$this->firstLoginListener->handle($user);
@@ -97,9 +114,21 @@ class InitialEmailTest extends TestCase {
 		$trackedNotification->setLastSendNotification(time());
 		$trackedNotification->setFirstTimeSent(false);
 
-		$this->service->method($this->once())
+		$this->service->expects($this->once())
 			->method('find')
 			->with('user1')
 			->willReturn($trackedNotification);
+
+		$template = $this->createMock(IEMailTemplate::class);
+
+		$this->mailer->expects($this->once())
+			->method('createEmailTemplate')
+			->withAnyParameters();
+
+		$this->provider->expects($this->once())
+			->method('writeOptOutMessage')
+			->withAnyParameters();
+
+		$this->firstLoginListener->handle($user);
 	}
 }
