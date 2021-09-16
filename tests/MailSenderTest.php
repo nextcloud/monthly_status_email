@@ -186,7 +186,7 @@ class MailSenderTest extends TestCase {
 			->willReturn([
 				'quota' => 100,
 				'used' => 95,
-				'usage_relative' => 100,
+				'usage_relative' => 95,
 			]);
 
 		$this->provider->expects($this->once())
@@ -217,7 +217,7 @@ class MailSenderTest extends TestCase {
 			->method('writeGenericMessage')
 			->with($this->template, $this->user, MessageProvider::NO_FILE_UPLOAD);
 
-		$this->shareManager->expects($this->atLeastOnce())
+		$this->shareManager->expects($this->never())
 			->method('getSharesBy')
 			->willReturn([]);
 
