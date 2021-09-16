@@ -127,7 +127,8 @@ class MailSenderTest extends TestCase {
 			$this->clientDetector,
 			$this->createMock(LoggerInterface::class),
 			$this->noFileUploadedDetector,
-			$this->storageInfoProvider
+			$this->storageInfoProvider,
+			$this->container
 		);
 
 		$message = $this->createMock(IMessage::class);

@@ -25,11 +25,13 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Service;
 
+use Icewind\SMB\IServer;
 use OC\Files\FileInfo;
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IL10N;
+use OCP\IServerContainer;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Mail\IEMailTemplate;
@@ -102,7 +104,8 @@ class MailSender {
 		ClientDetector $clientDetector,
 		LoggerInterface $logger,
 		NoFileUploadedDetector $noFileUploadedDetector,
-		StorageInfoProvider $storageInfoProvider
+		StorageInfoProvider $storageInfoProvider,
+		IServerContainer $container
 	) {
 		$this->service = $service;
 		$this->userManager = $userManager;
@@ -111,7 +114,7 @@ class MailSender {
 		$this->l = $l;
 		$this->shareManager = $shareManager;
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
-		$this->provider = \OC::$server->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
+		$this->provider = $container->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
 		$this->clientDetector = $clientDetector;
 		$this->logger = $logger;
 		$this->noFileUploadedDetector = $noFileUploadedDetector;
