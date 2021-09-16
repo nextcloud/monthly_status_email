@@ -77,6 +77,10 @@ class MailSenderTest extends TestCase {
 	 * @var IUserManager|\PHPUnit\Framework\MockObject\MockObject
 	 */
 	private $userManager;
+	/**
+	 * @var MailSender
+	 */
+	private $mailSender;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -161,5 +165,7 @@ class MailSenderTest extends TestCase {
 
 		$this->provider->expects($this->once())
 			->method('writeStorageFull');
+		$this->mailSender->sendMonthlyMailTo($trackedNotification);
+
 	}
 }
