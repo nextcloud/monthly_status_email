@@ -37,7 +37,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Application extends App implements IBootstrap {
-	public const APP_ID = 'monthly_notifications';
+	public const APP_ID = 'monthly_status_email';
 
 	public function __construct() {
 		parent::__construct(self::APP_ID);

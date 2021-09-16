@@ -59,7 +59,7 @@ class PersonalSettings implements ISettings {
 	 */
 	public function getForm(): TemplateResponse {
 		$this->initialState->provideInitialState('opted-out', $this->service->find($this->userSession->getUser()->getUID())->getOptedOut());
-		return new TemplateResponse('monthly_notifications', 'settings-personal', []);
+		return new TemplateResponse('monthly_status_email', 'settings-personal', []);
 	}
 
 	/** {@inheritDoc} */

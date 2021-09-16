@@ -9,7 +9,7 @@
 				v-model="sendNotifications"
 				type="checkbox"
 				class="checkbox">
-			<label for="send-notifications">{{ t('monthly_notifications', 'Send monthly summary') }}</label>
+			<label for="send-notifications">{{ t('monthly_status_email', 'Send monthly summary') }}</label>
 		</p>
 	</div>
 </template>
@@ -23,7 +23,7 @@ export default {
 	name: 'PersonalSettings',
 	data() {
 		return {
-			sendNotifications: !loadState('monthly_notifications', 'opted-out', false),
+			sendNotifications: !loadState('monthly_status_email', 'opted-out', false),
 		}
 	},
 	watch: {
@@ -36,7 +36,7 @@ export default {
 			const data = {
 				optedOut: !this.sendNotifications,
 			}
-			await axios.post(generateUrl('/apps/monthly_notifications/') + 'update', data)
+			await axios.post(generateUrl('/apps/monthly_status_email/') + 'update', data)
 		},
 	},
 }

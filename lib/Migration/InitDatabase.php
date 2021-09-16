@@ -73,7 +73,7 @@ class InitDatabase implements IRepairStep {
 	 */
 	public function run(IOutput $output) {
 		// only run once
-		if ($this->config->getAppValue('monthly_notifications', 'init_db') === 'yes') {
+		if ($this->config->getAppValue('monthly_status_email', 'init_db') === 'yes') {
 			$output->info('Montly Notifications database already executed');
 			return;
 		}
