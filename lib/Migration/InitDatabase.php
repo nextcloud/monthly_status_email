@@ -22,10 +22,10 @@
  *
  */
 
-namespace OCA\MonthlyNotifications\Migration;
+namespace OCA\MonthlyStatusEmail\Migration;
 
-use OCA\MonthlyNotifications\Jobs\InitDatabaseJob;
-use OCA\MonthlyNotifications\Service\NotificationTrackerService;
+use OCA\MonthlyStatusEmail\Jobs\InitDatabaseJob;
+use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\BackgroundJob\IJobList;
 use OCP\IConfig;
 use OCP\IDBConnection;

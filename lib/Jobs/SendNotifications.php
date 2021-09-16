@@ -24,12 +24,12 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\MonthlyNotifications\Jobs;
+namespace OCA\MonthlyStatusEmail\Jobs;
 
 use OC\Files\View;
-use OCA\MonthlyNotifications\Db\NotificationTracker;
-use OCA\MonthlyNotifications\Service\MessageProvider;
-use OCA\MonthlyNotifications\Service\NotificationTrackerService;
+use OCA\MonthlyStatusEmail\Db\NotificationTracker;
+use OCA\MonthlyStatusEmail\Service\MessageProvider;
+use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCP\IConfig;

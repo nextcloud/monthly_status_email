@@ -8,21 +8,21 @@
     <version>23.0.0</version>
     <licence>agpl</licence>
     <author>Carl Schwan</author>
-    <namespace>MonthlyNotifications</namespace>
+    <namespace>MonthlyStatusEmail</namespace>
     <category>social</category>
     <bugs>https://github.com/nextcloud/monthly_status_email/issues</bugs>
     <dependencies>
         <nextcloud min-version="21" max-version="23" />
     </dependencies>
     <background-jobs>
-        <job>OCA\MonthlyNotifications\Jobs\SendNotifications</job>
+        <job>OCA\MonthlyStatusEmail\Jobs\SendNotifications</job>
     </background-jobs>
     <settings>
-        <personal>OCA\MonthlyNotifications\Settings\PersonalSettings</personal>
+        <personal>OCA\MonthlyStatusEmail\Settings\PersonalSettings</personal>
     </settings>
 	<repair-steps>
 		<post-migration>
-			<step>OCA\MonthlyNotifications\Migration\InitDatabase</step>
+			<step>OCA\MonthlyStatusEmail\Migration\InitDatabase</step>
 		</post-migration>
 	</repair-steps>
 </info>

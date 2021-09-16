@@ -22,11 +22,11 @@
  *
  */
 
-namespace OCA\MonthlyNotifications\Listener;
+namespace OCA\MonthlyStatusEmail\Listener;
 
-use OCA\MonthlyNotifications\Service\MessageProvider;
-use OCA\MonthlyNotifications\Service\NotFoundException;
-use OCA\MonthlyNotifications\Service\NotificationTrackerService;
+use OCA\MonthlyStatusEmail\Service\MessageProvider;
+use OCA\MonthlyStatusEmail\Service\NotFoundException;
+use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\IUser;
 use OCP\IConfig;
 use OCP\Mail\IMailer;

@@ -11,8 +11,8 @@
 	<!-- filters for code coverage -->
 	<filter>
 		<whitelist>
-			<directory suffix=".php">../../monthly_notifications/appinfo</directory>
-			<directory suffix=".php">../../monthly_notifications/lib</directory>
+			<directory suffix=".php">../../monthly_status_email/appinfo</directory>
+			<directory suffix=".php">../../monthly_status_email/lib</directory>
 		</whitelist>
 	</filter>
 	<logging>

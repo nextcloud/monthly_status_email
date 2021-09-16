@@ -1,9 +1,26 @@
-<?php
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
 
-declare(strict_types=1);
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+
+/*!
+ * Vue.js v2.6.14
+ * (c) 2014-2021 Evan You
+ * Released under the MIT License.
+ */
 
 /**
  * @copyright Copyright (c) 2021 Carl Schwan <carl@carlschwan.eu>
+ *
+ * @author Carl Schwan <carl@carlschwan.eu>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -18,10 +35,6 @@ declare(strict_types=1);
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-script('monthly_status_email', 'monthly_status_email-personalSettings');
-?>
-<div id="monthly-notifications-settings"></div>

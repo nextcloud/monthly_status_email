@@ -22,7 +22,7 @@
  *
  */
 
-namespace OCA\MonthlyNotifications\Service;
+namespace OCA\MonthlyStatusEmail\Service;
 
 use Exception;
 

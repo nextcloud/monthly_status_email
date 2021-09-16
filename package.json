@@ -1,17 +1,17 @@
 {
-	"name": "monthly_notifications",
+	"name": "monthly_status_email",
 	"description": "This application enable to send monthly summary to users about their disk usage.",
 	"version": "23.0.0",
 	"author": "Carl Schwan <carl@carlschwan.eu>",
 	"contributors": [],
 	"bugs": {
-		"url": "https://github.com/nextcloud/monthly_notifications/issues"
+		"url": "https://github.com/nextcloud/monthly_status_email/issues"
 	},
 	"repository": {
-		"url": "https://github.com/nextcloud/monthly_notifications",
+		"url": "https://github.com/nextcloud/monthly_status_email",
 		"type": "git"
 	},
-	"homepage": "https://github.com/nextcloud/monthly_notifications",
+	"homepage": "https://github.com/nextcloud/monthly_status_email",
 	"license": "agpl",
 	"private": true,
 	"scripts": {

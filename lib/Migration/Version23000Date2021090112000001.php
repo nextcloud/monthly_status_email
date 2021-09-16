@@ -21,7 +21,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\MonthlyNotifications\Migration;
+namespace OCA\MonthlyStatusEmail\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;

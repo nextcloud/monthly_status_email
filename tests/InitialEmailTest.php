@@ -23,12 +23,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\MonthlyNotifications\Tests;
+namespace OCA\MonthlyStatusEmail\Tests;
 
-use OCA\MonthlyNotifications\Db\NotificationTracker;
-use OCA\MonthlyNotifications\Listener\FirstLoginListener;
-use OCA\MonthlyNotifications\Service\MessageProvider;
-use OCA\MonthlyNotifications\Service\NotificationTrackerService;
+use OCA\MonthlyStatusEmail\Db\NotificationTracker;
+use OCA\MonthlyStatusEmail\Listener\FirstLoginListener;
+use OCA\MonthlyStatusEmail\Service\MessageProvider;
+use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\IConfig;
 use OCP\IUser;
 use OCP\Mail\IMailer;

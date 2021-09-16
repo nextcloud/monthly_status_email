@@ -22,7 +22,7 @@
  *
  */
 
-namespace OCA\MonthlyNotifications\Db;
+namespace OCA\MonthlyStatusEmail\Db;
 
 use OCP\AppFramework\Db\Entity;
 

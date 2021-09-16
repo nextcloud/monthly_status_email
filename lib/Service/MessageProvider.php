@@ -22,10 +22,10 @@
  *
  */
 
-namespace OCA\MonthlyNotifications\Service;
+namespace OCA\MonthlyStatusEmail\Service;
 
-use OCA\MonthlyNotifications\Db\NotificationTracker;
-use OCA\MonthlyNotifications\Jobs\SendNotifications;
+use OCA\MonthlyStatusEmail\Db\NotificationTracker;
+use OCA\MonthlyStatusEmail\Jobs\SendNotifications;
 use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;

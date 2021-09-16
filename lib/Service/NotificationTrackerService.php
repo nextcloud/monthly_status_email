@@ -22,10 +22,10 @@
  *
  */
 
-namespace OCA\MonthlyNotifications\Service;
+namespace OCA\MonthlyStatusEmail\Service;
 
-use OCA\MonthlyNotifications\Db\NotificationTracker;
-use OCA\MonthlyNotifications\Db\NotificationTrackerMapper;
+use OCA\MonthlyStatusEmail\Db\NotificationTracker;
+use OCA\MonthlyStatusEmail\Db\NotificationTrackerMapper;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 

@@ -1,15 +1,15 @@
 <template>
 	<div id="monthly-notifications-settings" class="section">
-		<h2>{{ t('settings', 'Monthly summary notifications') }}</h2>
+		<h2>{{ t('monthly_status_email', 'Monthly Status Email') }}</h2>
 		<p class="settings-hint">
-			{{ t('settings', 'Here you can decide which group can access some of the admin settings.') }}
+			{{ t('monthly_status_email', 'Receive status emails with your current storage usage as well as some helpful tips and tricks') }}
 		</p>
 		<p>
 			<input id="send-notifications"
 				v-model="sendNotifications"
 				type="checkbox"
 				class="checkbox">
-			<label for="send-notifications">{{ t('monthly_status_email', 'Send monthly summary') }}</label>
+			<label for="send-notifications">{{ t('monthly_status_email', 'Send status email') }}</label>
 		</p>
 	</div>
 </template>

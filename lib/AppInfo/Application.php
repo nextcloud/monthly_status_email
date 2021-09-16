@@ -22,9 +22,9 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\MonthlyNotifications\AppInfo;
+namespace OCA\MonthlyStatusEmail\AppInfo;
 
-use OCA\MonthlyNotifications\Listener\FirstLoginListener;
+use OCA\MonthlyStatusEmail\Listener\FirstLoginListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;

@@ -22,10 +22,10 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\MonthlyNotifications\Controller;
+namespace OCA\MonthlyStatusEmail\Controller;
 
-use OCA\MonthlyNotifications\Service\NotFoundException;
-use OCA\MonthlyNotifications\Service\NotificationTrackerService;
+use OCA\MonthlyStatusEmail\Service\NotFoundException;
+use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\NotFoundResponse;

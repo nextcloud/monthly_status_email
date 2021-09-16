@@ -22,10 +22,10 @@
  *
  */
 
-namespace OCA\MonthlyNotifications\Jobs;
+namespace OCA\MonthlyStatusEmail\Jobs;
 
 use OC\BackgroundJob\QueuedJob;
-use OCA\MonthlyNotifications\Service\NotificationTrackerService;
+use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\IUser;
 use OCP\IUserManager;
 

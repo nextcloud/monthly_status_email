@@ -22,9 +22,9 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\MonthlyNotifications\Settings;
+namespace OCA\MonthlyStatusEmail\Settings;
 
-use OCA\MonthlyNotifications\Service\NotificationTrackerService;
+use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\IUserSession;

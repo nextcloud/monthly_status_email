@@ -25,7 +25,7 @@ declare(strict_types=1);
 /** @var \OCP\IL10N $l */
 /** @var array $_ */
 
-script('monthly_notifications', 'monthly_notifications-publicOptout');
+script('monthly_status_email', 'monthly_status_email-publicOptout');
 ?>
 <div class="section">
 	<h2><?php echo $l->t('Monthly status update'); ?></h2>
