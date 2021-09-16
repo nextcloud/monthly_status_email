@@ -41,6 +41,7 @@ use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
+use OCP\Mail\IMessage;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
 use Psr\Log\LoggerInterface;
@@ -173,9 +174,8 @@ class SendNotifications extends TimedJob {
 		$stop = $this->provider->writeStorageUsage($emailTemplate, $storageInfo);
 
 		if ($stop) {
-			$this->provider->writeClosing($emailTemplate);
-			$message->useTemplate($emailTemplate);
-			$this->mailer->send($message);
+			// Urgent storage warning, show it and don't display anything else
+			$this->sendEmail($emailTemplate, $user, $message);
 			return;
 		}
 
@@ -190,12 +190,9 @@ class SendNotifications extends TimedJob {
 		$view = new View('/' . $user->getUID() . '/files/');
 		$directoryContents = $view->getDirectoryContent('');
 		if (count($directoryContents) === 0) {
-			// No file/folder uploded
+			// No file/folder uploaded
 			$this->provider->writeGenericMessage($emailTemplate, $user, self::NO_FILE_UPLOAD);
-			$this->provider->writeClosing($emailTemplate);
-			$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
-			$message->useTemplate($emailTemplate);
-			$this->mailer->send($message);
+			$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
 			return;
 		}
 
@@ -215,10 +212,22 @@ class SendNotifications extends TimedJob {
 
 		// Choose one of the less urgent message randomly
 		$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
-		$this->provider->writeClosing($emailTemplate);
-		$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
-		$message->useTemplate($emailTemplate);
-		$this->mailer->send($message);
+		$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
+	}
+
+	private function sendEmail(IEMailTemplate $template, IUser $user, IMessage $message, ?NotificationTracker $trackedNotification = null): void {
+		$this->provider->writeClosing($template);
+		if ($trackedNotification !== null) {
+			$this->provider->writeOptOutMessage($template, $trackedNotification);
+		}
+		$message->useTemplate($template);
+		try {
+			$this->mailer->send($message);
+		} catch (\Exception $e) {
+			$this->logger->error('Error when sending status-email to ' . $user->getDisplayName() . ' with email address ' . $user->getEMailAddress() . ': ' . $e->getMessage(), [
+				'exception' => $e
+			]);
+		}
 
 		$trackedNotification->setLastSendNotification(time());
 		$this->service->update($trackedNotification);
