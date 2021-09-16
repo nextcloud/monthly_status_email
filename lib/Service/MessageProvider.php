@@ -299,7 +299,8 @@ EOF,
 	}
 
 	public function writeOptOutMessage(IEMailTemplate $emailTemplate, NotificationTracker $trackedNotification) {
-		$emailTemplate->addFooter(sprintf('Sie können die Status-Email <a href="%s">hier</a> abstellen',
+		$emailTemplate->addFooter(sprintf(
+			'Sie können die Status-Email <a href="%s">hier</a> abstellen',
 			$this->generator->getAbsoluteURL($this->generator->linkToRoute('monthly_status_email.optout.displayOptingOutPage', [
 				'token' => $trackedNotification->getSecretToken()
 			]))
