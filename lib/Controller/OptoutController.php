@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Controller;
 
+use OCA\MonthlyStatusEmail\Service\MailSender;
 use OCA\MonthlyStatusEmail\Service\NotFoundException;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Http\DataResponse;
@@ -47,6 +48,10 @@ class OptoutController extends Controller {
 	 * @var IUserSession
 	 */
 	private $session;
+	/**
+	 * @var MailSender
+	 */
+	private $mailSender;
 
 	/**
 	 * ApiController constructor.
@@ -58,12 +63,14 @@ class OptoutController extends Controller {
 		$appName,
 		IRequest $request,
 		IUserSession $session,
-		NotificationTrackerService $service
+		NotificationTrackerService $service,
+		MailSender $mailSender
 	) {
 		parent::__construct($appName, $request);
 		$this->service = $service;
 		$this->session = $session;
 		$this->appName = $appName;
+		$this->mailSender = $mailSender;
 	}
 
 	/**
@@ -71,7 +78,12 @@ class OptoutController extends Controller {
 	 */
 	public function update(bool $optedOut): DataResponse {
 		try {
-			$this->service->updateOptedOut($this->session->getUser()->getUID(), $optedOut);
+			$user = $this->session->getUser();
+			$trackedNotification = $this->service->updateOptedOut($this->session->getUser()->getUID(), $optedOut);
+			if (!$optedOut) {
+				// Use just activated the monthly email again
+				$this->mailSender->sendStatusEmailActivation($user, $trackedNotification);
+			}
 			return new DataResponse(['done' => true]);
 		} catch (NotFoundException $exception) {
 			return new DataResponse(['done' => false, 'exception' => 'not-found']);
