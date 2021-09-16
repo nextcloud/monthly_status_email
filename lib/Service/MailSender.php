@@ -241,8 +241,8 @@ class MailSender {
 
 		if ($trackedNotification !== null) {
 			$trackedNotification->setLastSendNotification(time());
+			$this->service->update($trackedNotification);
 		}
-		$this->service->update($trackedNotification);
 	}
 
 	private function handleShare(IUser $user): int {
