@@ -251,7 +251,7 @@ EOF,
 	}
 
 	public function writeWelcomeMail(IEMailTemplate $emailTemplate, string $name): void {
-		$emailTemplate->addHeading("Welcome !", [$name]);
+		$emailTemplate->addHeading("Welcome $name !");
 
 		$emailTemplate->addBodyText(
 			'mit der Status-Mail zur ' . $this->entity . ' informieren wir Sie einmail montatlich über Ihren belegten Speicherplatz und über Ihre erteilten Freigaben.',
