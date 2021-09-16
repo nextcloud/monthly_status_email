@@ -8,7 +8,7 @@ on:
       - stable*
 
 env:
-  APP_NAME: recommendations
+  APP_NAME: monthly_status_email
 
 jobs:
   oci:
