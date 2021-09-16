@@ -98,10 +98,9 @@ class SendNotifications extends TimedJob {
 								IMailer $mailer,
 								IL10N $l,
 								IDBConnection $connection,
-								IManager $shareManager,
-								MessageProvider $provider) {
+								IManager $shareManager) {
 		parent::__construct($time);
-		//$this->setInterval(60 * 60 * 3); // every 3 hours
+		$this->setInterval(60 * 60); // every hour
 		$this->service = $service;
 		$this->userManager = $userManager;
 		$this->config = $config;
@@ -110,7 +109,7 @@ class SendNotifications extends TimedJob {
 		$this->l = $l;
 		$this->shareManager = $shareManager;
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
-		$this->provider = $provider;
+		$this->provider = \OC::$server->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
 		$this->connection = $connection;
 	}
 
@@ -118,9 +117,10 @@ class SendNotifications extends TimedJob {
 	 * @inheritDoc
 	 */
 	protected function run($argument): void {
-		$limit = (int)$this->config->getAppValue($this->appName, 'max_mail_sent', 100);
+		$limit = (int)$this->config->getAppValue($this->appName, 'max_mail_sent', 1000);
 
-		//$trackedNotifications = $this->service->findAllOlderThan(new \DateTime("-1 month"), $limit);
+		// $trackedNotifications = $this->service->findAllOlderThan(new \DateTime("-1 month"), $limit);
+		// for debuging
 		$trackedNotifications = $this->service->findAllOlderThan(new \DateTime('now'), $limit);
 		foreach ($trackedNotifications as $trackedNotification) {
 			$message = $this->mailer->createMessage();

@@ -28,6 +28,7 @@ use OCA\MonthlyNotifications\Service\MessageProvider;
 use OCA\MonthlyNotifications\Service\NotFoundException;
 use OCA\MonthlyNotifications\Service\NotificationTrackerService;
 use OCP\IUser;
+use OCP\IConfig;
 use OCP\Mail\IMailer;
 
 // TODO port to IListener
@@ -41,11 +42,10 @@ class FirstLoginListener {
 	 */
 	private $provider;
 
-	public function __construct(IMailer $mailer, NotificationTrackerService $service,
-								MessageProvider $provider) {
+	public function __construct(IMailer $mailer, NotificationTrackerService $service, IConfig $config) {
 		$this->mailer = $mailer;
 		$this->service = $service;
-		$this->provider = $provider;
+		$this->provider = \OC::$server->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
 	}
 
 	/**
@@ -55,13 +55,13 @@ class FirstLoginListener {
 	 */
 	public function handle(IUser $user): void {
 		$message = $this->mailer->createMessage();
-		$trackedNotification = $this->service->find($user->getUID());
 		$to = $user->getEMailAddress();
 		if ($to === null) {
 			// We don't have any email address ignore the users. We can't send
 			// mails to them.
 			return;
 		}
+		$trackedNotification = $this->service->find($user->getUID());
 		$message->setFrom([$this->provider->getFromAddress()]);
 		$message->setTo([$to]);
 

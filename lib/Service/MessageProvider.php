@@ -262,7 +262,7 @@ EOF,
 	}
 
 	public function writeOptOutMessage(IEMailTemplate $emailTemplate, NotificationTracker $trackedNotification) {
-		$emailTemplate->addFooter($this->l->t('You can unsubscribe by clicking on this link: <a href="%s">Unsubscribe</a>', [
+		$emailTemplate->addFooter(sprintf('Sie können die Status-Email <a href="%s">hier</a> abstellen', [
 			$this->generator->getAbsoluteURL($this->generator->linkToRoute('monthly_notifications.optout.displayOptingOutPage', [
 				'token' => $trackedNotification->getSecretToken()
 			]))
