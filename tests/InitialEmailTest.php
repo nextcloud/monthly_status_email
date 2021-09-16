@@ -55,7 +55,7 @@ class InitialEmailTest extends TestCase {
 		$this->config = $this->createMock(IConfig::class);
 		$this->firstLoginListener = new FirstLoginListener($this->mailer, $this->service, $this->config);
 		$this->config->expects($this->any())
-			->method('getSystemValue')
+			->method('getSystemValueString')
 			->with('status-email-message-provider')
 			->willReturn(MessageProvider::class);
 	}
