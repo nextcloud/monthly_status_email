@@ -206,7 +206,6 @@ class MailSenderTest extends TestCase {
 		$this->provider->expects($this->once())
 			->method('writeStorageSpaceLeft')
 			->withAnyParameters();
-		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 
 		$this->noFileUploadedDetector->expects($this->once())
 			->method('hasNotUploadedFiles')
@@ -220,6 +219,8 @@ class MailSenderTest extends TestCase {
 		$this->shareManager->expects($this->atLeastOnce())
 			->method('getSharesBy')
 			->willReturn([]);
+
+		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 
 	public function testShare() {
@@ -234,7 +235,6 @@ class MailSenderTest extends TestCase {
 		$this->provider->expects($this->once())
 			->method('writeStorageSpaceLeft')
 			->withAnyParameters();
-		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 
 		$this->noFileUploadedDetector->expects($this->once())
 			->method('hasNotUploadedFiles')
@@ -247,5 +247,7 @@ class MailSenderTest extends TestCase {
 
 		$this->provider->expects($this->once())
 			->method('writeShareMessage');
+
+		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 }
