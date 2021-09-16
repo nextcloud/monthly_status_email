@@ -50,14 +50,20 @@ class InitialEmailTest extends TestCase {
 
 	public function setUp(): void {
 		parent::setUp();
+		$config = \OC::$server->getConfig();
 		$this->mailer = $this->createMock(IMailer::class);
 		$this->service = $this->createMock(NotificationTrackerService::class);
 		$this->config = $this->createMock(IConfig::class);
-		$this->firstLoginListener = new FirstLoginListener($this->mailer, $this->service, $this->config);
 		$this->config->expects($this->any())
 			->method('getSystemValueString')
-			->with('status-email-message-provider')
-			->willReturn(MessageProvider::class);
+			->willReturnCallback(function ($key, $default) use ($config) {
+				if ($key === 'status-email-message-provider') {
+					return MessageProvider::class;
+				} else {
+					return $config->getSystemValueString($key, $default);
+				}
+			});
+		$this->firstLoginListener = new FirstLoginListener($this->mailer, $this->service, $this->config);
 	}
 
 	public function testUserNoEmail() {
