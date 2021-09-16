@@ -160,6 +160,7 @@ class MailSenderTest extends TestCase {
 			->willReturn($this->template);
 
 		$message->expects($this->once())
+			->method('useTemplate')
 			->with($this->template);
 	}
 
