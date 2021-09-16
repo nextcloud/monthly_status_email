@@ -216,6 +216,10 @@ class MailSenderTest extends TestCase {
 		$this->provider->expects($this->once())
 			->method('writeGenericMessage')
 			->with($this->template, $this->user, MessageProvider::NO_FILE_UPLOAD);
+
+		$this->shareManager->expects($this->atLeastOnce())
+			->method('getSharesBy')
+			->willReturn([]);
 	}
 
 	public function testShare() {
@@ -238,8 +242,9 @@ class MailSenderTest extends TestCase {
 			->willReturn(false);
 
 		$this->shareManager->expects($this->atLeastOnce())
-			->method('getShareBy')
+			->method('getSharesBy')
 			->willReturn([0]);
+
 		$this->provider->expects($this->once())
 			->method('writeShareMessage');
 	}
