@@ -39,8 +39,10 @@ class InitDatabaseJob extends QueuedJob {
 	 */
 	private $userManager;
 
-	public function __construct(NotificationTrackerService $service,
-								IUserManager $userManager) {
+	public function __construct(
+		NotificationTrackerService $service,
+		IUserManager $userManager
+	) {
 		$this->service = $service;
 		$this->userManager = $userManager;
 	}

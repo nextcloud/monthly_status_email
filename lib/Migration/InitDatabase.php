@@ -51,9 +51,11 @@ class InitDatabase implements IRepairStep {
 	 * @param IJobList $jobList
 	 * @param IConfig $config
 	 */
-	public function __construct(IJobList $jobList,
-								IConfig $config,
-								NotificationTrackerService $service) {
+	public function __construct(
+		IJobList $jobList,
+		IConfig $config,
+		NotificationTrackerService $service
+	) {
 		$this->jobList = $jobList;
 		$this->config = $config;
 		$this->service = $service;

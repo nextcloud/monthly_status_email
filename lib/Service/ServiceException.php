@@ -25,5 +25,4 @@
 namespace OCA\MonthlyNotifications\Service;
 
 class ServiceException extends \Exception {
-
 }

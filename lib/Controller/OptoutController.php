@@ -36,7 +36,6 @@ use OCP\IRequest;
 use OCP\AppFramework\Controller;
 use OCP\IUserSession;
 
-
 /**
  * Controller responsible for opting out of the notifications.
  */
@@ -56,10 +55,12 @@ class OptoutController extends Controller {
 	 * @param string $appName
 	 * @param IRequest $request
 	 */
-	public function __construct($appName,
-								IRequest $request,
-								IUserSession $session,
-								NotificationTrackerService $service) {
+	public function __construct(
+		$appName,
+		IRequest $request,
+		IUserSession $session,
+		NotificationTrackerService $service
+	) {
 		parent::__construct($appName, $request);
 		$this->service = $service;
 		$this->session = $session;

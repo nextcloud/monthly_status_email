@@ -44,9 +44,11 @@ class PersonalSettings implements ISettings {
 	 */
 	private $userSession;
 
-	public function __construct(IInitialState $initialState,
-								NotificationTrackerService $service,
-								IUserSession $userSession) {
+	public function __construct(
+		IInitialState $initialState,
+		NotificationTrackerService $service,
+		IUserSession $userSession
+	) {
 		$this->initialState = $initialState;
 		$this->service = $service;
 		$this->userSession = $userSession;

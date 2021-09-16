@@ -24,7 +24,6 @@
 
 namespace OCA\MonthlyNotifications\Service;
 
-
 use OCA\MonthlyNotifications\Db\NotificationTracker;
 use OCA\MonthlyNotifications\Jobs\SendNotifications;
 use OCP\Files\FileInfo;
@@ -124,7 +123,8 @@ class MessageProvider {
 
 		if ($storageInfo['quota'] === FileInfo::SPACE_UNLIMITED) {
 			// Message no quota
-			$emailTemplate->addBodyText(<<<EOF
+			$emailTemplate->addBodyText(
+				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td>
@@ -141,9 +141,10 @@ EOF,
 				"Speicherplatz\n\nSie nutzen im Moment $usedSpace"
 			);
 			return false;
-		} else if ($storageInfo['usage_relative'] < 90) {
+		} elseif ($storageInfo['usage_relative'] < 90) {
 			// Message quota but less than 90% used
-			$emailTemplate->addBodyText(<<<EOF
+			$emailTemplate->addBodyText(
+				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td>
@@ -162,9 +163,10 @@ EOF,
 				"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1] von insgesammt $quota[0] $quota[1]."
 			);
 			return false;
-		} else if ($storageInfo['usage_relative'] < 99) {
+		} elseif ($storageInfo['usage_relative'] < 99) {
 			// Warning almost no storage left
-			$emailTemplate->addBodyText(<<<EOF
+			$emailTemplate->addBodyText(
+				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td>
@@ -189,7 +191,8 @@ EOF,
 			return true;
 		} else {
 			// Warning no storage left
-			$emailTemplate->addBodyText(<<<EOF
+			$emailTemplate->addBodyText(
+				<<<EOF
 <table style="background-color: #f8f8f8; padding: 20px; width: 100%">
 	<tr>
 		<td>
@@ -225,14 +228,14 @@ EOF,
 
 		$emailTemplate->addBodyText(
 			'Außerdem geben wir Ihnen Tipps und Tricks zum täaglichen Umgang mit Ihrer ' . $this->entity . '. Wie Sie Dateien hochlanden, verschieben, freigeben, etc., erfagren Sie hier: <a href="TODO">Erste Hilfe</a>',
-
 			'Außerdem geben wir Ihnen Tipps und Tricks zum täaglichen Umgang mit Ihrer ' . strip_tags($this->entity) . '. Wie Sie Dateien hochlanden, verschieben, freigeben, etc., erfagren Sie hier: [Erste Hilfe](TODO)',
 		);
 	}
 
 	public function writeShareMessage(IEMailTemplate $emailTemplate, int $shareCount) {
 		if ($shareCount > 100) {
-			$emailTemplate->addBodyText(<<<EOF
+			$emailTemplate->addBodyText(
+				<<<EOF
 <div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
 	<h3 style="font-weight: bold">Freigaben</h3>
 	<p>Sie haben mehr als $shareCount Dateien freigegeben.</p>
@@ -240,8 +243,9 @@ EOF,
 EOF,
 				"Freigabeben\n\nSie haben mehr als $shareCount Dateien freigegeben."
 			);
-		} else if ($shareCount ===  0) {
-			$emailTemplate->addBodyText(<<<EOF
+		} elseif ($shareCount === 0) {
+			$emailTemplate->addBodyText(
+				<<<EOF
 <div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
 	<h3 style="font-weight: bold">Freigaben</h3>
 	<p>Sie haben keine Dateien freigegeben.</p>
@@ -249,8 +253,9 @@ EOF,
 EOF,
 				"Freigabeben\n\nSie haben kein Dateien freigegeben."
 			);
-		} else if ($shareCount ===  1) {
-			$emailTemplate->addBodyText(<<<EOF
+		} elseif ($shareCount === 1) {
+			$emailTemplate->addBodyText(
+				<<<EOF
 <div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
 	<h3 style="font-weight: bold">Freigaben</h3>
 	<p>Sie haben eine Datein freigegeben.</p>

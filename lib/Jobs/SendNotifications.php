@@ -91,15 +91,17 @@ class SendNotifications extends TimedJob {
 	 */
 	private $connection;
 
-	public function __construct($appName,
-								ITimeFactory $time,
-								NotificationTrackerService $service,
-								IUserManager $userManager,
-								IConfig $config,
-								IMailer $mailer,
-								IL10N $l,
-								IDBConnection $connection,
-								IManager $shareManager) {
+	public function __construct(
+		$appName,
+		ITimeFactory $time,
+		NotificationTrackerService $service,
+		IUserManager $userManager,
+		IConfig $config,
+		IMailer $mailer,
+		IL10N $l,
+		IDBConnection $connection,
+		IManager $shareManager
+	) {
 		parent::__construct($time);
 		$this->setInterval(60 * 60); // every hour
 		$this->service = $service;
@@ -164,8 +166,8 @@ class SendNotifications extends TimedJob {
 
 		if ($trackedNotification->getOptedOut()) {
 			// People opting-out of the monthly emails should still get the
-			// 'urgent' email about the storage, but the rest shouldn't be
-			// sent.
+			// 'urgent' email about running out of storage, but the rest
+			// shouldn't be sent.
 			return;
 		}
 

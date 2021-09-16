@@ -37,7 +37,7 @@ class NotificationTrackerService {
 	 *
 	 * @param NotificationTrackerMapper $mapper
 	 */
-	public function __construct(NotificationTrackerMapper $mapper){
+	public function __construct(NotificationTrackerMapper $mapper) {
 		$this->mapper = $mapper;
 	}
 
@@ -59,7 +59,7 @@ class NotificationTrackerService {
 	public function find(string $userId): NotificationTracker {
 		try {
 			return $this->mapper->find($userId);
-		} catch(\Exception $e) {
+		} catch (\Exception $e) {
 			return $this->create($userId, false, time());
 		}
 	}
@@ -100,7 +100,7 @@ class NotificationTrackerService {
 			$notificationTracker->setOptedOut($optedOut);
 			$this->mapper->update($notificationTracker);
 			return $notificationTracker;
-		} catch(\Exception $e) {
+		} catch (\Exception $e) {
 			try {
 				$this->create($userId, $optedOut, time());
 			} catch (\Exception $exception) {
@@ -119,7 +119,7 @@ class NotificationTrackerService {
 			$notificationTracker->setLastSendNotification($time);
 			$this->mapper->update($notificationTracker);
 			return $notificationTracker;
-		} catch(Exception $e) {
+		} catch (Exception $e) {
 			$this->handleException($e);
 		}
 	}

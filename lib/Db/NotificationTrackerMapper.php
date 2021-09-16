@@ -28,7 +28,6 @@ use OCP\AppFramework\Db\QBMapper;
 use OCP\IDBConnection;
 
 class NotificationTrackerMapper extends QBMapper {
-
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'notification_tracker', NotificationTracker::class);
 	}
@@ -77,5 +76,4 @@ class NotificationTrackerMapper extends QBMapper {
 
 		return $this->findEntities($qb);
 	}
-
 }

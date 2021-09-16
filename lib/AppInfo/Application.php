@@ -53,9 +53,9 @@ class Application extends App implements IBootstrap {
 		$firstLoginListener = $container->get(FirstLoginListener::class);
 		$server->get(IEventDispatcher::class)
 			->addListener(IUser::class . '::firstLogin', function ($event) use ($firstLoginListener) {
-			if ($event instanceof GenericEvent) {
-				$firstLoginListener->handle($event->getSubject());
-			}
-		});
+				if ($event instanceof GenericEvent) {
+					$firstLoginListener->handle($event->getSubject());
+				}
+			});
 	}
 }
