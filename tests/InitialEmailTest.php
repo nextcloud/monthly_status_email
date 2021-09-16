@@ -94,6 +94,9 @@ class InitialEmailTest extends TestCase {
 		$user->expects($this->once())
 			->method('getUid')
 			->willReturn('user1');
+		$user->expects($this->any())
+			->method('getDisplayName')
+			->willReturn('Foo Bar');
 		$user->expects($this->once())
 			->method('getEmailAddress')
 			->willReturn('foo@bar.corp');
