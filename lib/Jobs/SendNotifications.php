@@ -28,10 +28,12 @@ namespace OCA\MonthlyStatusEmail\Jobs;
 
 use OC\Files\View;
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
+use OCA\MonthlyStatusEmail\Service\ClientDetector;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IL10N;
@@ -41,6 +43,7 @@ use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
+use Psr\Log\LoggerInterface;
 
 class SendNotifications extends TimedJob {
 	public const NO_SHARE_AVAILABLE = 0;
@@ -90,6 +93,14 @@ class SendNotifications extends TimedJob {
 	 * @var IDBConnection
 	 */
 	private $connection;
+	/**
+	 * @var ClientDetector
+	 */
+	private $clientDetector;
+	/**
+	 * @var LoggerInterface
+	 */
+	private $logger;
 
 	public function __construct(
 		$appName,
@@ -100,7 +111,9 @@ class SendNotifications extends TimedJob {
 		IMailer $mailer,
 		IL10N $l,
 		IDBConnection $connection,
-		IManager $shareManager
+		IManager $shareManager,
+		ClientDetector $clientDetector,
+		LoggerInterface $logger
 	) {
 		parent::__construct($time);
 		$this->setInterval(60 * 60); // every hour
@@ -114,6 +127,8 @@ class SendNotifications extends TimedJob {
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
 		$this->provider = \OC::$server->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
 		$this->connection = $connection;
+		$this->clientDetector = $clientDetector;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -238,31 +253,23 @@ class SendNotifications extends TimedJob {
 	}
 
 	private function handleClientCondition(IUser $user): array {
-		$qb = $this->connection->getQueryBuilder();
-		$hasDesktopClientQuery = $qb->from('authtoken')
-			->select('name')
-			->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
-			->andWhere($qb->expr()->like('name', '%(Desktop Client -%'))
-			->setMaxResults(1);
-		$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
-
-		$hasMobileClientQuery = $qb->from('authtoken')
-			->select('name')
-			->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
-			->andWhere($qb->expr()->orX(
-				$qb->expr()->eq('name', 'Nextcloud-iOS'),
-				$qb->expr()->like('name', '%Nextcloud-android%'),
-			))
-			->setMaxResults(1);
-		$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
+		try {
+			$hasDesktopClient = $this->clientDetector->hasDesktopConnection($user);
+			$hasMobileClient = $this->clientDetector->hasMobileConnection($user);
+		} catch (Exception $e) {
+			$this->logger->error('There was an error when trying to detect mobile/desktop connection' . $e->getMessage(), [
+				'exception' => $e
+			]);
+			return [];
+		}
 
 		$availableGenericMessages = [];
 
-		if (!$hasDesktopClientQuery && !$hasMobileClientQuery) {
+		if (!$hasDesktopClient && !$hasMobileClient) {
 			$availableGenericMessages[] = self::NO_CLIENT_CONNECTION;
-		} elseif (!$hasMobileClientQuery) {
+		} elseif (!$hasMobileClient) {
 			$availableGenericMessages[] = self::NO_MOBILE_CLIENT_CONNECTION;
-		} elseif (!$hasDesktopClientQuery) {
+		} elseif (!$hasDesktopClient) {
 			$availableGenericMessages[] = self::NO_DESKTOP_CLIENT_CONNECTION;
 		}
 		return $availableGenericMessages;
