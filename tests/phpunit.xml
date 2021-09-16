@@ -19,4 +19,7 @@
 		<!-- and this is where your report will be written -->
 		<log type="coverage-clover" target="./clover.xml"/>
 	</logging>
+	<php>
+		<ini name="display_errors" value="true"/>
+	</php>
 </phpunit>

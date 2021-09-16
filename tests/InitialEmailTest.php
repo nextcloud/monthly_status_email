@@ -59,17 +59,8 @@ class InitialEmailTest extends TestCase {
 		$config = \OC::$server->getConfig();
 		$this->mailer = $this->createMock(IMailer::class);
 		$this->service = $this->createMock(NotificationTrackerService::class);
-		$this->config = $this->createMock(IConfig::class);
+		$this->config = $config;
 		$this->container = $this->createMock(IServerContainer::class);
-		$this->config->expects($this->any())
-			->method('getSystemValueString')
-			->willReturnCallback(function ($key, $default) use ($config) {
-				if ($key === 'status-email-message-provider') {
-					return MessageProvider::class;
-				} else {
-					return $config->getSystemValueString($key, $default);
-				}
-			});
 		$this->provider = $this->createMock(MessageProvider::class);
 		$this->container->expects($this->any())
 			->method('get')
