@@ -143,9 +143,6 @@ class MailSenderTest extends TestCase {
 		$this->trackedNotification->setFirstTimeSent(false);
 
 		$this->user = $this->createMock(IUser::class);
-		$this->user->expects($this->any())
-			->method('getUid')
-			->willReturn('user1');
 		$this->user->expects($this->once())
 			->method('getEmailAddress')
 			->willReturn('user1@corp.corp');
@@ -218,5 +215,31 @@ class MailSenderTest extends TestCase {
 		$this->provider->expects($this->once())
 			->method('writeGenericMessage')
 			->with($this->template, $this->user, MessageProvider::NO_FILE_UPLOAD);
+	}
+
+	public function testShare() {
+		$this->storageInfoProvider->expects($this->once())
+			->method('getStorageInfo')
+			->willReturn([
+				'quota' => 100,
+				'used' => 50,
+				'usage_relative' => 50,
+			]);
+
+		$this->provider->expects($this->once())
+			->method('writeStorageSpaceLeft')
+			->withAnyParameters();
+		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+
+		$this->noFileUploadedDetector->expects($this->once())
+			->method('hasNotUploadedFiles')
+			->with($this->user)
+			->willReturn(false);
+
+		$this->shareManager->expects($this->atLeastOnce())
+			->method('getShareBy')
+			->willReturn([0]);
+		$this->provider->expects($this->once())
+			->method('writeShareMessage');
 	}
 }
