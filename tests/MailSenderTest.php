@@ -81,6 +81,18 @@ class MailSenderTest extends TestCase {
 	 * @var MailSender
 	 */
 	private $mailSender;
+	/**
+	 * @var NotificationTracker
+	 */
+	private $trackedNotification;
+	/**
+	 * @var IUser|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $user;
+	/**
+	 * @var IEMailTemplate|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $template;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -117,55 +129,94 @@ class MailSenderTest extends TestCase {
 			$this->noFileUploadedDetector,
 			$this->storageInfoProvider
 		);
-	}
 
-	public function testStorageEmpty() {
 		$message = $this->createMock(IMessage::class);
 		$this->mailer->expects($this->once())
 			->method('createMessage')
 			->willReturn($message);
 
-		$trackedNotification = new NotificationTracker();
-		$trackedNotification->setOptedOut(false);
-		$trackedNotification->setUserId('user1');
-		$trackedNotification->setSecretToken('rere');
-		$trackedNotification->setLastSendNotification(time());
-		$trackedNotification->setFirstTimeSent(false);
+		$this->trackedNotification = new NotificationTracker();
+		$this->trackedNotification->setOptedOut(false);
+		$this->trackedNotification->setUserId('user1');
+		$this->trackedNotification->setSecretToken('rere');
+		$this->trackedNotification->setLastSendNotification(time());
+		$this->trackedNotification->setFirstTimeSent(false);
 
-		$user = $this->createMock(IUser::class);
-		$user->expects($this->any())
+		$this->user = $this->createMock(IUser::class);
+		$this->user->expects($this->any())
 			->method('getUid')
 			->willReturn('user1');
-		$user->expects($this->once())
+		$this->user->expects($this->once())
 			->method('getEmailAddress')
 			->willReturn('user1@corp.corp');
 
 		$this->userManager->expects($this->once())
 			->method('get')
 			->with('user1')
-			->willReturn($user);
+			->willReturn($this->user);
 
-		$template = $this->createMock(IEMailTemplate::class);
+		$this->template = $this->createMock(IEMailTemplate::class);
 
 		$this->mailer->expects($this->once())
 			->method('createEmailTemplate')
 			->withAnyParameters()
-			->willReturn($template);
+			->willReturn($this->template);
 
-		$this->provider->expects($this->once())
-			->method('writeOptOutMessage')
-			->withAnyParameters();
+		$message->expects($this->once())
+			->with($this->template);
+	}
 
+	public function testStorageEmpty() {
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
 				'quota' => 100,
-				'used' => 100
+				'used' => 100,
+				'usage_relative' => 100,
 			]);
 
 		$this->provider->expects($this->once())
-			->method('writeStorageFull');
-		$this->mailSender->sendMonthlyMailTo($trackedNotification);
+			->method('writeStorageFull')
+			->withAnyParameters();
+		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+	}
 
+	public function testStorageWarning() {
+		$this->storageInfoProvider->expects($this->once())
+			->method('getStorageInfo')
+			->willReturn([
+				'quota' => 100,
+				'used' => 95,
+				'usage_relative' => 100,
+			]);
+
+		$this->provider->expects($this->once())
+			->method('writeStorageWarning')
+			->withAnyParameters();
+		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+	}
+
+	public function testStorageSafe() {
+		$this->storageInfoProvider->expects($this->once())
+			->method('getStorageInfo')
+			->willReturn([
+				'quota' => 100,
+				'used' => 50,
+				'usage_relative' => 50,
+			]);
+
+		$this->provider->expects($this->once())
+			->method('writeStorageSpaceLeft')
+			->withAnyParameters();
+		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+
+		$this->noFileUploadedDetector->expects($this->once())
+			->method('hasNotUploadedFiles')
+			->with($this->user)
+			->willReturn(true);
+
+		$this->provider->expects($this->once())
+			->method('writeGenericMessage')
+			->with($this->template, $this->user, MessageProvider::NO_FILE_UPLOAD);
 	}
 }
