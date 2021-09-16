@@ -183,6 +183,31 @@ class SendNotifications extends TimedJob {
 		}
 
 		// Handle share specific events
+		$shareCount = $this->handleShare($user);
+		$this->provider->writeShareMessage($emailTemplate, $shareCount);
+
+		// Add tips to randomly selected messages
+		$availableGenericMessages = [self::TIP_DISCOVER_PARTNER, self::TIP_EMAIL_CENTER, self::TIP_FILE_RECOVERY, self::TIP_MORE_STORAGE];
+
+		if ($shareCount === 0) {
+			$availableGenericMessages[] = self::NO_SHARE_AVAILABLE;
+		}
+
+		// Handle desktop/mobile client connection detection
+		$availableGenericMessages = array_merge($availableGenericMessages, $this->handleClientCondition($user));
+
+		// Choose one of the less urgent message randomly
+		$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
+		$this->provider->writeClosing($emailTemplate);
+		$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
+		$message->useTemplate($emailTemplate);
+		$this->mailer->send($message);
+
+		$trackedNotification->setLastSendNotification(time());
+		$this->service->update($trackedNotification);
+	}
+
+	private function handleShare(IUser $user): int {
 		$requestedShareTypes = [
 			IShare::TYPE_USER,
 			IShare::TYPE_GROUP,
@@ -207,16 +232,10 @@ class SendNotifications extends TimedJob {
 				break; // don't
 			}
 		}
+		return $shareCount;
+	}
 
-		$this->provider->writeShareMessage($emailTemplate, $shareCount);
-
-		$availableGenericMessages = [self::TIP_DISCOVER_PARTNER, self::TIP_EMAIL_CENTER, self::TIP_FILE_RECOVERY, self::TIP_MORE_STORAGE];
-
-		if ($shareCount === 0) {
-			$availableGenericMessages[] = self::NO_SHARE_AVAILABLE;
-		}
-
-		// Handling of desktop/mobile client detection
+	private function handleClientCondition(IUser $user): array {
 		$qb = $this->connection->getQueryBuilder();
 		$hasDesktopClientQuery = $qb->from('authtoken')
 			->select('name')
@@ -235,6 +254,8 @@ class SendNotifications extends TimedJob {
 			->setMaxResults(1);
 		$this->connection->executeQuery($hasDesktopClientQuery->getSQL());
 
+		$availableGenericMessages = [];
+
 		if (!$hasDesktopClientQuery && !$hasMobileClientQuery) {
 			$availableGenericMessages[] = self::NO_CLIENT_CONNECTION;
 		} elseif (!$hasMobileClientQuery) {
@@ -242,15 +263,7 @@ class SendNotifications extends TimedJob {
 		} elseif (!$hasDesktopClientQuery) {
 			$availableGenericMessages[] = self::NO_DESKTOP_CLIENT_CONNECTION;
 		}
-
-		$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
-		$this->provider->writeClosing($emailTemplate);
-		$this->provider->writeOptOutMessage($emailTemplate, $trackedNotification);
-		$message->useTemplate($emailTemplate);
-		$this->mailer->send($message);
-
-		$trackedNotification->setLastSendNotification(time());
-		$this->service->update($trackedNotification);
+		return $availableGenericMessages;
 	}
 
 	private function getFromAddress():string {
