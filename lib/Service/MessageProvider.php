@@ -216,7 +216,7 @@ EOF,
 	</tr>
 </table>
 EOF,
-			"Speicherplatz\n\nSie nutzen im Moment $usedSpace"
+			"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1]"
 		);
 	}
 

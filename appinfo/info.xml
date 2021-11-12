@@ -12,14 +12,17 @@
     <category>social</category>
     <bugs>https://github.com/nextcloud/monthly_status_email/issues</bugs>
     <dependencies>
-        <nextcloud min-version="21" max-version="23" />
+        <nextcloud min-version="21" max-version="24" />
     </dependencies>
     <background-jobs>
         <job>OCA\MonthlyStatusEmail\Jobs\SendNotificationsJob</job>
     </background-jobs>
-    <settings>
-        <personal>OCA\MonthlyStatusEmail\Settings\PersonalSettings</personal>
-    </settings>
+	<commands>
+		<command>OCA\MonthlyStatusEmail\Command\SendMail</command>
+	</commands>
+	<settings>
+		<personal>OCA\MonthlyStatusEmail\Settings\PersonalSettings</personal>
+	</settings>
 	<repair-steps>
 		<post-migration>
 			<step>OCA\MonthlyStatusEmail\Migration\InitDatabase</step>

@@ -47,9 +47,9 @@ class ClientDetector {
 		$hasDesktopClientQuery = $qb->from('authtoken')
 			->select('name')
 			->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
-			->andWhere($qb->expr()->like('name', '%(Desktop Client -%'))
+			->andWhere($qb->expr()->like('name', $qb->createNamedParameter('%(Desktop Client -%')))
 			->setMaxResults(1);
-		return $this->connection->executeQuery($hasDesktopClientQuery->getSQL())->rowCount() === 1;
+		return $qb->executeQuery()->rowCount() === 1;
 	}
 
 	/**
@@ -61,10 +61,10 @@ class ClientDetector {
 			->select('name')
 			->where($qb->expr()->eq('uid', $qb->createNamedParameter($user->getUID())))
 			->andWhere($qb->expr()->orX(
-				$qb->expr()->eq('name', 'Nextcloud-iOS'),
-				$qb->expr()->like('name', '%Nextcloud-android%'),
+				$qb->expr()->eq('name', $qb->createNamedParameter('Nextcloud-iOS')),
+				$qb->expr()->like('name', $qb->createNamedParameter('%Nextcloud-android%')),
 			))
 			->setMaxResults(1);
-		return $this->connection->executeQuery($hasMobileClientQuery->getSQL())->rowCount() === 1;
+		return $qb->executeQuery()->rowCount() === 1;
 	}
 }
