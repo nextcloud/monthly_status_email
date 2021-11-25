@@ -290,10 +290,20 @@ EOF,
 				<<<EOF
 <div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
 	<h3 style="font-weight: bold">Freigaben</h3>
-	<p>Sie haben eine Datein freigegeben.</p>
+	<p>Sie haben eine Datei freigegeben.</p>
 </div>
 EOF,
 				"Freigabeben\n\nSie haben eine Datei freigegeben."
+			);
+		} else {
+			$emailTemplate->addBodyText(
+				<<<EOF
+<div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
+	<h3 style="font-weight: bold">Freigaben</h3>
+	<p>Sie haben $shareCount Dateien freigegeben.</p>
+</div>
+EOF,
+				"Freigabeben\n\nSie haben $shareCount Dateien freigegeben."
 			);
 		}
 	}
