@@ -5,7 +5,7 @@
     <name>Monthly Status Email</name>
     <summary>Monthly notifications with storage usage and tips and tricks</summary>
     <description>Monthly notifications with some storage usage information and tips and tricks.</description>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <licence>agpl</licence>
     <author>Carl Schwan</author>
     <namespace>MonthlyStatusEmail</namespace>
