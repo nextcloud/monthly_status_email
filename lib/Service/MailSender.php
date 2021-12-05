@@ -137,6 +137,8 @@ class MailSender {
 		$emailTemplate = $this->mailer->createEMailTemplate('quote.notification');
 		$emailTemplate->addHeader();
 		$emailTemplate->setSubject(strip_tags($this->entity) . ' Status-Mail');
+
+		$this->provider->setUser($user);
 		return $emailTemplate;
 	}
 
