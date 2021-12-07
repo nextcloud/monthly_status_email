@@ -27,6 +27,7 @@ can be changed with the `status-email-max-mail-sent`.
 [
     ...,
     'status-email-max-mail-sent' => '10000'
+    'status-email-send-first-login-mail' => true
 ]
 ```
 
