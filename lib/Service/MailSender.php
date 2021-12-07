@@ -114,7 +114,12 @@ class MailSender {
 		$this->l = $l;
 		$this->shareManager = $shareManager;
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
-		$this->provider = $container->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
+		$className = $config->getSystemValueString('status-email-message-provider', MessageProvider::class);
+		if (class_exists($className)) {
+			$this->provider = $container->get($className);
+		} else {
+			$this->provider = $container->get(MessageProvider::class);
+		}
 		$this->clientDetector = $clientDetector;
 		$this->logger = $logger;
 		$this->noFileUploadedDetector = $noFileUploadedDetector;

@@ -52,7 +52,12 @@ class FirstLoginListener {
 		$this->mailer = $mailer;
 		$this->service = $service;
 		$this->entity = strip_tags($config->getAppValue('theming', 'name', 'Nextcloud'));
-		$this->provider = $container->get($config->getSystemValueString('status-email-message-provider', MessageProvider::class));
+		$className = $config->getSystemValueString('status-email-message-provider', MessageProvider::class);
+		if (class_exists($className)) {
+			$this->provider = $container->get($className);
+		} else {
+			$this->provider = $container->get(MessageProvider::class);
+		}
 	}
 
 	/**
