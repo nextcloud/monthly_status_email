@@ -40,16 +40,15 @@ class FirstLoginListener {
 	private $mailer;
 	/** @var NotificationTrackerService */
 	private $service;
-	/**
-	 * @var MessageProvider
-	 */
+	/** @var MessageProvider */
 	private $provider;
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	private $entity;
+	/** @var bool */
+	private $enabled;
 
 	public function __construct(IMailer $mailer, NotificationTrackerService $service, IConfig $config, IServerContainer $container) {
+		$this->enabled = $config->getSystemValueBool('status-email-send-first-login-mail', true);
 		$this->mailer = $mailer;
 		$this->service = $service;
 		$this->entity = strip_tags($config->getAppValue('theming', 'name', 'Nextcloud'));
@@ -69,8 +68,14 @@ class FirstLoginListener {
 			return;
 		}
 
-		$message = $this->mailer->createMessage();
+		// Initialise database
 		$trackedNotification = $this->service->find($user->getUID());
+
+		if (!$this->enabled) {
+			return; // Feature is disabled, cancel sending initial login email
+		}
+
+		$message = $this->mailer->createMessage();
 		$message->setFrom([$this->provider->getFromAddress()]);
 		$message->setTo([$to]);
 
