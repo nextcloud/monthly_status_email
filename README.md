@@ -21,12 +21,21 @@ You can then edit your config.php to tell this app to use your MessageProvider i
 
 This app will try to spread out as much as possible the amount of mails sent at the same
 time and will send them per batch each hour with a maximum of 1000 per hour. This limits
-can be changed with the `status-email-max-mail-sent`.
+can be changed with the `status-email-max-mail-sent` in app config:
 
+
+```bash
+php occ config:app:set monthly_status_email status-email-max-mail-sent --value=2500
+```
+
+## Sending welcome status emails
+
+By default users will get initial mail when they log in for the first time. 
+This can be disabled through the following switch in config.php:
 ```php
 [
     ...,
-    'status-email-max-mail-sent' => '10000'
+    'status-email-send-first-login-mail' => true
 ]
 ```
 

@@ -33,6 +33,7 @@ use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\IUser;
+use OCP\L10N\IFactory;
 use OCP\Mail\IEMailTemplate;
 
 class MessageProvider {
@@ -64,12 +65,25 @@ class MessageProvider {
 	 * @var string
 	 */
 	private $entity;
+	/**
+	 * @var IUser
+	 */
+	private $user;
+	/**
+	 * @var IL10N
+	 */
+	private $l10n;
+	/**
+	 * @var IFactory
+	 */
+	private $l10nFactory;
 
-	public function __construct(IConfig $config, IURLGenerator $generator) {
+	public function __construct(IConfig $config, IURLGenerator $generator, IFactory $l10nFactory) {
 		$this->productName = $config->getAppValue('theming', 'productName', 'Nextcloud');
 		$this->entity = $config->getAppValue('theming', 'name', 'Nextcloud');
 		$this->generator = $generator;
 		$this->config = $config;
+		$this->l10nFactory = $l10nFactory;
 	}
 
 	/**
@@ -216,7 +230,7 @@ EOF,
 	</tr>
 </table>
 EOF,
-			"Speicherplatz\n\nSie nutzen im Moment $usedSpace"
+			"Speicherplatz\n\nSie nutzen im Moment $usedSpace[0] $usedSpace[1]"
 		);
 	}
 
@@ -290,10 +304,20 @@ EOF,
 				<<<EOF
 <div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
 	<h3 style="font-weight: bold">Freigaben</h3>
-	<p>Sie haben eine Datein freigegeben.</p>
+	<p>Sie haben eine Datei freigegeben.</p>
 </div>
 EOF,
 				"Freigabeben\n\nSie haben eine Datei freigegeben."
+			);
+		} else {
+			$emailTemplate->addBodyText(
+				<<<EOF
+<div style="background-color: #f8f8f8; padding: 20px; float: right; margin-top: 50px">
+	<h3 style="font-weight: bold">Freigaben</h3>
+	<p>Sie haben $shareCount Dateien freigegeben.</p>
+</div>
+EOF,
+				"Freigabeben\n\nSie haben $shareCount Dateien freigegeben."
 			);
 		}
 	}
@@ -387,5 +411,13 @@ EOF,
 				return;
 
 		}
+	}
+
+	public function setUser(IUser $user) {
+		$this->user = $user;
+		$this->l10n = $this->l10nFactory->get(
+			'monthly_status_email',
+			$this->config->getUserValue($user->getUID(), 'lang', null)
+		);
 	}
 }

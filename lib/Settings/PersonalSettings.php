@@ -64,11 +64,11 @@ class PersonalSettings implements ISettings {
 
 	/** {@inheritDoc} */
 	public function getSection(): string {
-		return 'personal-info';
+		return 'activity';
 	}
 
 	/** {@inheritDoc} */
 	public function getPriority(): int {
-		return 100;
+		return 0;
 	}
 }
