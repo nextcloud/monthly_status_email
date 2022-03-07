@@ -150,4 +150,12 @@ class NotificationTrackerService {
 	public function update(NotificationTracker $notificationTracker) {
 		$this->mapper->update($notificationTracker);
 	}
+
+	public function delete(NotificationTracker $notificationTracker) {
+		try {
+			$this->mapper->delete($notificationTracker);
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
+	}
 }

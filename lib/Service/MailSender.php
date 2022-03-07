@@ -173,12 +173,19 @@ class MailSender {
 	}
 
 
-	public function sendMonthlyMailTo(NotificationTracker $trackedNotification) {
+	/**
+	 * @return bool Whether a notification was sent
+	 */
+	public function sendMonthlyMailTo(NotificationTracker $trackedNotification): bool {
 		$message = $this->mailer->createMessage();
 		$user = $this->userManager->get($trackedNotification->getUserId());
+		if ($user === null) {
+			$this->service->delete($trackedNotification);
+			return false;
+		}
 		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
 		if ($emailTemplate === null) {
-			return;
+			return false;
 		}
 
 		// Handle storage specific events
@@ -187,7 +194,7 @@ class MailSender {
 		if ($stop) {
 			// Urgent storage warning, show it and don't display anything else
 			$this->sendEmail($emailTemplate, $user, $message);
-			return;
+			return true;
 		}
 
 		if ($trackedNotification->getOptedOut()) {
@@ -202,7 +209,7 @@ class MailSender {
 			// No file/folder uploaded
 			$this->provider->writeGenericMessage($emailTemplate, $user, MessageProvider::NO_FILE_UPLOAD);
 			$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
-			return;
+			return true;
 		}
 
 		// Handle share specific events
@@ -227,6 +234,10 @@ class MailSender {
 	public function sendStatusEmailActivation(IUser $user, NotificationTracker $trackedNotification): void {
 		$message = $this->mailer->createMessage();
 		$user = $this->userManager->get($trackedNotification->getUserId());
+		if ($user === null) {
+			$this->service->delete($trackedNotification);
+			return;
+		}
 		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
 		if ($emailTemplate === null) {
 			return;
