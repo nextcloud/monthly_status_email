@@ -52,9 +52,9 @@ class SendMail extends Base {
 
 	protected function configure() {
 		$this
-			->setName('monthly_status_email:send')
-			->setDescription('Send the notification mail to a specific user')
-			->addArgument('user_id', InputArgument::REQUIRED, 'Id of the folder to configure');
+						->setName('monthly_status_email:send')
+						->setDescription('Send the notification mail to a specific user')
+						->addArgument('user_id', InputArgument::REQUIRED, 'Id of the folder to configure');
 		parent::configure();
 	}
 
@@ -62,12 +62,23 @@ class SendMail extends Base {
 		$userId = $input->getArgument('user_id');
 		$trackedNotification = $this->service->find($userId);
 		$user = $this->userManager->get($trackedNotification->getUserId());
+		if ($user === null) {
+			$output->writeln('<error>User doesn\'t exist</error>');
+			return 1;
+		}
+
 		$to = $user->getEMailAddress();
 		if ($to === null) {
 			// We don't have any email address, not sure what to do here.
 			$output->writeln('<error>User doesn\'t have an email address</error>');
+			return 1;
 		}
-		$this->mailSender->sendMonthlyMailTo($trackedNotification);
+		$ret = $this->mailSender->sendMonthlyMailTo($trackedNotification);
+		if ($ret) {
+			$output->writeln('Email sent to ' . $user->getDisplayName());
+		} else {
+			$output->writeln('Failure sending email to ' . $user->getDisplayName());
+		}
 		return 0;
 	}
 }

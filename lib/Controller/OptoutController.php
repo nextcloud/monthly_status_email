@@ -94,11 +94,8 @@ class OptoutController extends Controller {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 * @UserRateThrottle
-	 * @param bool $token
-	 * @param bool $optedOut
-	 * @return DataResponse
 	 */
-	public function displayOptingOutPage(string $token): TemplateResponse {
+	public function displayOptingOutPage(string $token): PublicTemplateResponse {
 		// This page is required since link in emails get often visited with
 		// GET requests by email clients. JS will take care of sending POST
 		// request once the page is loaded.
@@ -110,8 +107,7 @@ class OptoutController extends Controller {
 	/**
 	 * @PublicPage
 	 * @UserRateThrottle
-	 * @param bool $token
-	 * @return DataResponse
+	 * @return DataResponse|NotFoundResponse
 	 */
 	public function updateOptingOut(string $token): Response {
 		try {

@@ -69,7 +69,7 @@ class NotificationTrackerMapper extends QBMapper {
 		$qb->select('*')
 			->from($this->getTableName())
 			->where(
-				$qb->expr()->gt('lastSendNotification', $qb->createNamedParameter($date->getTimestamp()))
+				$qb->expr()->lt('last_send_notification', $qb->createNamedParameter($date->getTimestamp()))
 			)
 			->setMaxResults($limit);
 		return $this->findEntities($qb);
