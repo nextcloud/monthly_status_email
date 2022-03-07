@@ -201,7 +201,7 @@ class MailSender {
 			// People opting-out of the monthly emails should still get the
 			// 'urgent' email about running out of storage, but the rest
 			// shouldn't be sent.
-			return;
+			return false;
 		}
 
 		// Handle no file upload
@@ -229,6 +229,7 @@ class MailSender {
 		// Choose one of the less urgent message randomly
 		$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
 		$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
+		return true;
 	}
 
 	public function sendStatusEmailActivation(IUser $user, NotificationTracker $trackedNotification): void {

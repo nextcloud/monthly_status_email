@@ -104,7 +104,7 @@ class NotificationTrackerService {
 			return $notificationTracker;
 		} catch (\Exception $e) {
 			try {
-				$this->create($userId, $optedOut, time());
+				return $this->create($userId, $optedOut, time());
 			} catch (\Exception $exception) {
 				$this->handleException($exception);
 			}
@@ -139,7 +139,7 @@ class NotificationTrackerService {
 		}
 	}
 
-	public function uptadeOptedOutByToken(string $token, bool $optedOut) {
+	public function uptadeOptedOutByToken(string $token, bool $optedOut): void {
 		try {
 			$this->mapper->updateOptedOutByToken($token, $optedOut);
 		} catch (Exception $e) {
@@ -147,11 +147,11 @@ class NotificationTrackerService {
 		}
 	}
 
-	public function update(NotificationTracker $notificationTracker) {
+	public function update(NotificationTracker $notificationTracker): void {
 		$this->mapper->update($notificationTracker);
 	}
 
-	public function delete(NotificationTracker $notificationTracker) {
+	public function delete(NotificationTracker $notificationTracker): void {
 		try {
 			$this->mapper->delete($notificationTracker);
 		} catch (Exception $e) {
