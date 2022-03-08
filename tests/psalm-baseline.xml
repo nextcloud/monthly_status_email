@@ -42,11 +42,4 @@
       <code>\OC_Util</code>
     </UndefinedClass>
   </file>
-  <file src="vendor/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php">
-    <ParseError occurrences="3">
-      <code>;</code>
-      <code>;</code>
-      <code>Match</code>
-    </ParseError>
-  </file>
 </files>
