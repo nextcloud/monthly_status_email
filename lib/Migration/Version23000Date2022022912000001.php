@@ -55,8 +55,6 @@ class Version23000Date2022022912000001 extends SimpleMigrationStep {
 		$rows = $result->fetchAll();
 		$result->closeCursor();
 
-		\OC::$server->getLogger()->critical(var_export($rows, true));
-
 		$delete = $this->connection->getQueryBuilder();
 		$delete->delete('notification_tracker')
 			->where($delete->expr()->eq('user_id', $delete->createParameter('user_id')))
