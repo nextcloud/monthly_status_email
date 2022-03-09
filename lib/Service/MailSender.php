@@ -173,12 +173,19 @@ class MailSender {
 	}
 
 
-	public function sendMonthlyMailTo(NotificationTracker $trackedNotification) {
+	/**
+	 * @return bool Whether a notification was sent
+	 */
+	public function sendMonthlyMailTo(NotificationTracker $trackedNotification): bool {
 		$message = $this->mailer->createMessage();
 		$user = $this->userManager->get($trackedNotification->getUserId());
+		if ($user === null) {
+			$this->service->delete($trackedNotification);
+			return false;
+		}
 		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
 		if ($emailTemplate === null) {
-			return;
+			return false;
 		}
 
 		// Handle storage specific events
@@ -187,14 +194,14 @@ class MailSender {
 		if ($stop) {
 			// Urgent storage warning, show it and don't display anything else
 			$this->sendEmail($emailTemplate, $user, $message);
-			return;
+			return true;
 		}
 
 		if ($trackedNotification->getOptedOut()) {
 			// People opting-out of the monthly emails should still get the
 			// 'urgent' email about running out of storage, but the rest
 			// shouldn't be sent.
-			return;
+			return false;
 		}
 
 		// Handle no file upload
@@ -202,7 +209,7 @@ class MailSender {
 			// No file/folder uploaded
 			$this->provider->writeGenericMessage($emailTemplate, $user, MessageProvider::NO_FILE_UPLOAD);
 			$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
-			return;
+			return true;
 		}
 
 		// Handle share specific events
@@ -222,11 +229,16 @@ class MailSender {
 		// Choose one of the less urgent message randomly
 		$this->provider->writeGenericMessage($emailTemplate, $user, $availableGenericMessages[array_rand($availableGenericMessages)]);
 		$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
+		return true;
 	}
 
 	public function sendStatusEmailActivation(IUser $user, NotificationTracker $trackedNotification): void {
 		$message = $this->mailer->createMessage();
 		$user = $this->userManager->get($trackedNotification->getUserId());
+		if ($user === null) {
+			$this->service->delete($trackedNotification);
+			return;
+		}
 		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
 		if ($emailTemplate === null) {
 			return;

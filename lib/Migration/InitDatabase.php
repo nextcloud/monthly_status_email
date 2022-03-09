@@ -82,8 +82,5 @@ class InitDatabase implements IRepairStep {
 
 		$output->info('Add background job');
 		$this->jobList->add(InitDatabaseJob::class);
-
-		// if all were done, no need to redo the repair during next upgrade
-		$this->config->setAppValue('dav', 'buildCalendarSearchIndex', 'yes');
 	}
 }
