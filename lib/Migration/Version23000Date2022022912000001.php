@@ -46,7 +46,8 @@ class Version23000Date2022022912000001 extends SimpleMigrationStep {
 		$query = $this->connection->getQueryBuilder();
 
 		// delete all but one entries for each user_id
-		$query->select($query->func()->max('id', 'newest_entry'), 'user_id')
+		$query->selectAlias($query->func()->max('id'), 'newest_entry')
+			->addSelect('user_id')
 			->from('notification_tracker')
 			->groupBy('user_id');
 
