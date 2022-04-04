@@ -204,6 +204,10 @@ class MailSender {
 			return false;
 		}
 
+		// Handle share specific events
+		$shareCount = $this->handleShare($user);
+		$this->provider->writeShareMessage($emailTemplate, $shareCount);
+
 		// Handle no file upload
 		if ($this->noFileUploadedDetector->hasNotUploadedFiles($user)) {
 			// No file/folder uploaded
@@ -211,10 +215,6 @@ class MailSender {
 			$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
 			return true;
 		}
-
-		// Handle share specific events
-		$shareCount = $this->handleShare($user);
-		$this->provider->writeShareMessage($emailTemplate, $shareCount);
 
 		// Add tips to randomly selected messages
 		$availableGenericMessages = [MessageProvider::TIP_DISCOVER_PARTNER, MessageProvider::TIP_EMAIL_CENTER, MessageProvider::TIP_FILE_RECOVERY, MessageProvider::TIP_MORE_STORAGE];
