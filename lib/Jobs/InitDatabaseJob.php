@@ -26,8 +26,9 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Jobs;
 
-use OC\BackgroundJob\QueuedJob;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
+use OCP\BackgroundJob\QueuedJob;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IUser;
 use OCP\IUserManager;
 
@@ -43,8 +44,10 @@ class InitDatabaseJob extends QueuedJob {
 
 	public function __construct(
 		NotificationTrackerService $service,
-		IUserManager $userManager
+		IUserManager $userManager,
+		ITimeFactory $timeFactory
 	) {
+		parent::__construct($timeFactory);
 		$this->service = $service;
 		$this->userManager = $userManager;
 	}

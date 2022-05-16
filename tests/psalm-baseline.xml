@@ -1,34 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.x-dev@">
-  <file src="lib/Command/SendMail.php">
-    <UndefinedClass occurrences="1">
-      <code>Base</code>
-    </UndefinedClass>
-  </file>
-  <file src="lib/Jobs/InitDatabaseJob.php">
-    <UndefinedClass occurrences="1">
-      <code>QueuedJob</code>
-    </UndefinedClass>
-  </file>
-  <file src="lib/Migration/InitDatabase.php">
-    <MissingDependency occurrences="1">
-      <code>InitDatabaseJob</code>
-    </MissingDependency>
-  </file>
-  <file src="lib/Service/MailSender.php">
-    <UndefinedClass occurrences="1">
-      <code>FileInfo</code>
-    </UndefinedClass>
-  </file>
   <file src="lib/Service/MessageProvider.php">
     <NullArgument occurrences="1">
       <code>null</code>
     </NullArgument>
-  </file>
-  <file src="lib/Service/NoFileUploadedDetector.php">
-    <UndefinedClass occurrences="1">
-      <code>View</code>
-    </UndefinedClass>
   </file>
   <file src="lib/Service/NotificationTrackerService.php">
     <InvalidReturnType occurrences="3">
@@ -36,10 +11,5 @@
       <code>NotificationTracker</code>
       <code>NotificationTracker[]</code>
     </InvalidReturnType>
-  </file>
-  <file src="lib/Service/StorageInfoProvider.php">
-    <UndefinedClass occurrences="1">
-      <code>\OC_Util</code>
-    </UndefinedClass>
   </file>
 </files>

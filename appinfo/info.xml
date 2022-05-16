@@ -19,6 +19,7 @@
     </background-jobs>
 	<commands>
 		<command>OCA\MonthlyStatusEmail\Command\SendMail</command>
+		<command>OCA\MonthlyStatusEmail\Command\SendAllMail</command>
 	</commands>
 	<settings>
 		<personal>OCA\MonthlyStatusEmail\Settings\PersonalSettings</personal>
