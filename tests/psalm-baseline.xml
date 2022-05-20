@@ -5,11 +5,4 @@
       <code>null</code>
     </NullArgument>
   </file>
-  <file src="lib/Service/NotificationTrackerService.php">
-    <InvalidReturnType occurrences="3">
-      <code>NotificationTracker</code>
-      <code>NotificationTracker</code>
-      <code>NotificationTracker[]</code>
-    </InvalidReturnType>
-  </file>
 </files>

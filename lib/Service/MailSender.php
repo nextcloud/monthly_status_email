@@ -182,6 +182,11 @@ class MailSender {
 			$this->service->delete($trackedNotification);
 			return false;
 		}
+		if ($user->getLastLogin() === 0) {
+			$this->service->delete($trackedNotification);
+			return false;
+		}
+
 		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
 		if ($emailTemplate === null) {
 			return false;

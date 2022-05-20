@@ -29,6 +29,9 @@ namespace OCA\MonthlyStatusEmail\Db;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\IDBConnection;
 
+/**
+ * @extends QBMapper<NotificationTracker>
+ */
 class NotificationTrackerMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'notification_tracker', NotificationTracker::class);
@@ -72,6 +75,18 @@ class NotificationTrackerMapper extends QBMapper {
 				$qb->expr()->lt('last_send_notification', $qb->createNamedParameter($date->getTimestamp()))
 			)
 			->setMaxResults($limit);
+		return $this->findEntities($qb);
+	}
+
+	/**
+	 * @return NotificationTracker[]
+	 * @throws \OCP\DB\Exception
+	 */
+	public function findAll(): array {
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from($this->getTableName());
 		return $this->findEntities($qb);
 	}
 }
