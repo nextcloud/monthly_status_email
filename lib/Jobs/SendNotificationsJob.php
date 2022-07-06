@@ -50,6 +50,10 @@ class SendNotificationsJob extends TimedJob {
 	 * @var NotificationTrackerService
 	 */
 	private $service;
+	/**
+	 * @var LoggerInterface
+	 */
+	private $logger;
 
 	public function __construct(
 		string $appName,
