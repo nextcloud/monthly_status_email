@@ -4,6 +4,7 @@
 namespace OCA\MonthlyStatusEmail\Service;
 
 use OCP\IUser;
+use OCP\Files\IRootFolder;
 use OC\Files\View;
 
 class StorageInfoProvider {
@@ -15,24 +16,22 @@ class StorageInfoProvider {
 	public function getStorageInfo(IUser $user): array {
 		\OC_Util::setupFS($user->getUID());
 
-		// return storage info without adding mount points
-		$includeExtStorage = \OC::$server->getConfig()->getSystemValueBool('quota_include_external_storage', false);
-		$view = new View("/" . $user->getUID() . "/files");
-		$fullPath = $view->getAbsolutePath('');
+		/** @var IRootFolder $rootFolder */
+		$rootFolder = \OC::$server->get(IRootFolder::class);
+		$userFolder = $rootFolder->getUserFolder($user->getUID());
 
-		$rootInfo = $view->getFileInfo('', 'ext');
-		if (!$rootInfo instanceof \OCP\Files\FileInfo) {
+		if (!($userFolder instanceof \OCP\Files\FileInfo)) {
 			throw new \OCP\Files\NotFoundException();
 		}
-		$used = $rootInfo->getSize(true);
+		$used = $userFolder->getSize(true);
 		if ($used < 0) {
 			$used = 0;
 		}
 		$quota = \OCP\Files\FileInfo::SPACE_UNLIMITED;
-		$mount = $rootInfo->getMountPoint();
+		$mount = $userFolder->getMountPoint();
 		$storage = $mount->getStorage();
 		$sourceStorage = $storage;
-		$internalPath = $rootInfo->getInternalPath();
+		$internalPath = $userFolder->getInternalPath();
 		if ($sourceStorage->instanceOfStorage('\OC\Files\Storage\Wrapper\Quota')) {
 			/** @var \OC\Files\Storage\Wrapper\Quota $storage */
 			$quota = $sourceStorage->getQuota();
