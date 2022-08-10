@@ -213,13 +213,13 @@ class MailSenderTest extends TestCase {
 			->with($this->user)
 			->willReturn(true);
 
+		$this->shareManager->expects($this->atLeastOnce())
+			->method('getSharesBy')
+			->willReturn([]);
+
 		$this->provider->expects($this->once())
 			->method('writeGenericMessage')
 			->with($this->template, $this->user, MessageProvider::NO_FILE_UPLOAD);
-
-		$this->shareManager->expects($this->never())
-			->method('getSharesBy')
-			->willReturn([]);
 
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}

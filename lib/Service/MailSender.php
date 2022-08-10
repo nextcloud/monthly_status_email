@@ -25,8 +25,7 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Service;
 
-use Icewind\SMB\IServer;
-use OC\Files\FileInfo;
+use OCP\Files\FileInfo;
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
 use OCP\DB\Exception;
 use OCP\IConfig;
@@ -183,6 +182,11 @@ class MailSender {
 			$this->service->delete($trackedNotification);
 			return false;
 		}
+		if ($user->getLastLogin() === 0) {
+			$this->service->delete($trackedNotification);
+			return false;
+		}
+
 		$emailTemplate = $this->setUpMail($message, $trackedNotification, $user);
 		if ($emailTemplate === null) {
 			return false;
@@ -215,8 +219,6 @@ class MailSender {
 			$this->sendEmail($emailTemplate, $user, $message, $trackedNotification);
 			return true;
 		}
-
-		
 
 		// Add tips to randomly selected messages
 		$availableGenericMessages = [MessageProvider::TIP_DISCOVER_PARTNER, MessageProvider::TIP_EMAIL_CENTER, MessageProvider::TIP_FILE_RECOVERY, MessageProvider::TIP_MORE_STORAGE];

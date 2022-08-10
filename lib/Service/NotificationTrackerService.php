@@ -45,6 +45,7 @@ class NotificationTrackerService {
 
 	/**
 	 * @throws NotFoundException
+	 * @return never
 	 */
 	private function handleException(\Exception $e) {
 		if ($e instanceof DoesNotExistException ||
@@ -134,6 +135,15 @@ class NotificationTrackerService {
 	public function findAllOlderThan(\DateTimeInterface $date, int $limit): array {
 		try {
 			return $this->mapper->findAllOlderThan($date, $limit);
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
+	}
+
+	/** @return NotificationTracker[] */
+	public function findAll(): array {
+		try {
+			return $this->mapper->findAll();
 		} catch (Exception $e) {
 			$this->handleException($e);
 		}

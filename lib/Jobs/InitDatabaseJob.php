@@ -26,8 +26,9 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Jobs;
 
-use OC\BackgroundJob\QueuedJob;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
+use OCP\BackgroundJob\QueuedJob;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IUser;
 use OCP\IUserManager;
 
@@ -43,18 +44,16 @@ class InitDatabaseJob extends QueuedJob {
 
 	public function __construct(
 		NotificationTrackerService $service,
-		IUserManager $userManager
+		IUserManager $userManager,
+		ITimeFactory $timeFactory
 	) {
+		parent::__construct($timeFactory);
 		$this->service = $service;
 		$this->userManager = $userManager;
 	}
 
 	protected function run($argument) {
-		$this->userManager->callForAllUsers(function (IUser $user) {
-			if ($user->getLastLogin() === 0) {
-				// Don't send notifications to users who never logged in
-				return;
-			}
+		$this->userManager->callForSeenUsers(function (IUser $user): void {
 			try {
 				// Spreads out reminders so that not every mails is sent at once.
 				$randomNumberOfDays = new \DateInterval('P' . rand(0, 30) . 'D');
