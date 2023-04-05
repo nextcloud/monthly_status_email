@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
  * @copyright Copyright 2021 Carl Schwan <carl@carlschwan.eu>
@@ -28,7 +30,6 @@ use OCA\MonthlyStatusEmail\Service\MailSender;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SendMail extends Base {
