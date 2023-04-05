@@ -27,8 +27,6 @@ declare(strict_types=1);
 namespace OCA\MonthlyStatusEmail\Service;
 
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
-use OCA\MonthlyStatusEmail\Jobs\SendNotificationsJob;
-use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IURLGenerator;

@@ -32,7 +32,6 @@ use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NoFileUploadedDetector;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCA\MonthlyStatusEmail\Service\StorageInfoProvider;
-use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IServerContainer;
 use OCP\IUser;
