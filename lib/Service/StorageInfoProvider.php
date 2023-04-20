@@ -5,7 +5,6 @@ namespace OCA\MonthlyStatusEmail\Service;
 
 use OCP\IUser;
 use OCP\Files\IRootFolder;
-use OC\Files\View;
 
 class StorageInfoProvider {
 	/**

@@ -29,7 +29,6 @@ use OCA\MonthlyStatusEmail\Db\NotificationTracker;
 use OCA\MonthlyStatusEmail\Listener\FirstLoginListener;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
-use OCP\IConfig;
 use OCP\IServerContainer;
 use OCP\IUser;
 use OCP\Mail\IEMailTemplate;
