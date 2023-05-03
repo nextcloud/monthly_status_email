@@ -8,6 +8,8 @@
     <version>1.0.9</version>
     <licence>agpl</licence>
     <author>Carl Schwan</author>
+    <author>Jonas Meurer</author>
+    <author>Vitor Mattos</author>
     <namespace>MonthlyStatusEmail</namespace>
     <category>social</category>
     <bugs>https://github.com/nextcloud/monthly_status_email/issues</bugs>
