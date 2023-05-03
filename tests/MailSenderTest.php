@@ -82,6 +82,10 @@ class MailSenderTest extends TestCase {
 	 */
 	private $mailSender;
 	/**
+	 * @var IMessage
+	 */
+	private $message;
+	/**
 	 * @var NotificationTracker
 	 */
 	private $trackedNotification;
@@ -131,10 +135,10 @@ class MailSenderTest extends TestCase {
 			$this->container
 		);
 
-		$message = $this->createMock(IMessage::class);
+		$this->message = $this->createMock(IMessage::class);
 		$this->mailer->expects($this->once())
 			->method('createMessage')
-			->willReturn($message);
+			->willReturn($this->message);
 
 		$this->trackedNotification = new NotificationTracker();
 		$this->trackedNotification->setOptedOut(false);
@@ -159,13 +163,13 @@ class MailSenderTest extends TestCase {
 			->method('createEmailTemplate')
 			->withAnyParameters()
 			->willReturn($this->template);
-
-		$message->expects($this->once())
-			->method('useTemplate')
-			->with($this->template);
 	}
 
 	public function testStorageEmpty(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -181,6 +185,10 @@ class MailSenderTest extends TestCase {
 	}
 
 	public function testStorageWarning(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -196,6 +204,10 @@ class MailSenderTest extends TestCase {
 	}
 
 	public function testStorageSafe(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -225,6 +237,10 @@ class MailSenderTest extends TestCase {
 	}
 
 	public function testShare(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -250,5 +266,30 @@ class MailSenderTest extends TestCase {
 			->method('writeShareMessage');
 
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+	}
+
+	public function testOptedOutUpdateTimestamp(): void {
+		$this->storageInfoProvider->expects($this->once())
+			->method('getStorageInfo')
+			->willReturn([
+				'quota' => 100,
+				'used' => 50,
+				'usage_relative' => 50,
+			]);
+
+		$this->trackedNotification->setOptedOut(true);
+
+		$timestamp = $this->trackedNotification->getLastSendNotification();
+		sleep(1);
+
+		// NotificationTrackerService->update() gets TrackedNotification with updated timestamp
+		$this->service
+			->expects($this->once())
+			->method('update')
+			->willReturnCallback(function ($trackedNotification) use ($timestamp) {
+				self::assertGreaterThan($timestamp, $trackedNotification->getLastSendNotification());
+			});
+
+		self::assertFalse($this->mailSender->sendMonthlyMailTo($this->trackedNotification));
 	}
 }
