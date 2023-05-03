@@ -40,40 +40,41 @@ use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
 use OCP\Mail\IMessage;
 use OCP\Share\IManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Test\TestCase;
 
 class MailSenderTest extends TestCase {
 	/**
-	 * @var NotificationTrackerService|\PHPUnit\Framework\MockObject\MockObject
+	 * @var NotificationTrackerService|MockObject
 	 */
 	private $service;
 	/**
-	 * @var IMailer|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IMailer|MockObject
 	 */
 	private $mailer;
 	/**
-	 * @var MessageProvider|\PHPUnit\Framework\MockObject\MockObject
+	 * @var MessageProvider|MockObject
 	 */
 	private $provider;
 	/**
-	 * @var StorageInfoProvider|\PHPUnit\Framework\MockObject\MockObject
+	 * @var StorageInfoProvider|MockObject
 	 */
 	private $storageInfoProvider;
 	/**
-	 * @var ClientDetector|\PHPUnit\Framework\MockObject\MockObject
+	 * @var ClientDetector|MockObject
 	 */
 	private $clientDetector;
 	/**
-	 * @var NoFileUploadedDetector|\PHPUnit\Framework\MockObject\MockObject
+	 * @var NoFileUploadedDetector|MockObject
 	 */
 	private $noFileUploadedDetector;
 	/**
-	 * @var IManager|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IManager|MockObject
 	 */
 	private $shareManager;
 	/**
-	 * @var IUserManager|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IUserManager|MockObject
 	 */
 	private $userManager;
 	/**
@@ -85,11 +86,11 @@ class MailSenderTest extends TestCase {
 	 */
 	private $trackedNotification;
 	/**
-	 * @var IUser|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IUser|MockObject
 	 */
 	private $user;
 	/**
-	 * @var IEMailTemplate|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IEMailTemplate|MockObject
 	 */
 	private $template;
 
@@ -106,9 +107,9 @@ class MailSenderTest extends TestCase {
 			->willReturnCallback(function ($class) {
 				if ($class === MessageProvider::class) {
 					return $this->provider;
-				} else {
-					return \OC::$server->get($class);
 				}
+
+				return \OC::$server->get($class);
 			});
 		$this->userManager = $this->createMock(IUserManager::class);
 		$this->shareManager = $this->createMock(IManager::class);
@@ -164,7 +165,7 @@ class MailSenderTest extends TestCase {
 			->with($this->template);
 	}
 
-	public function testStorageEmpty() {
+	public function testStorageEmpty(): void {
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -179,7 +180,7 @@ class MailSenderTest extends TestCase {
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 
-	public function testStorageWarning() {
+	public function testStorageWarning(): void {
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -194,7 +195,7 @@ class MailSenderTest extends TestCase {
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 
-	public function testStorageSafe() {
+	public function testStorageSafe(): void {
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -223,7 +224,7 @@ class MailSenderTest extends TestCase {
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 
-	public function testShare() {
+	public function testShare(): void {
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
