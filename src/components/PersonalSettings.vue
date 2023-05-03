@@ -2,7 +2,7 @@
 	<div id="monthly-notifications-settings" class="section">
 		<h2>{{ t('monthly_status_email', 'Monthly Status Email') }}</h2>
 		<p class="settings-hint">
-			{{ t('monthly_status_email', 'Receive status emails with your current storage usage as well as some helpful tips and tricks') }}
+			{{ t('monthly_status_email', 'Receive monthly status mails with a summary of usaged storage and usage hints') }}
 		</p>
 		<p>
 			<input id="send-notifications"

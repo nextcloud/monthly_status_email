@@ -1,14 +1,19 @@
 # Montly Status email
 
-Apps allowing to send monthly status emails to cloud customers. This is a internal apps.
+Send monthly status mails to users. This app doesn't provide a user interface.
+
+Per default it sends a summary of used storage along with some usage hints.
+
+The default messages are in German.
 
 ## Editing the messages sent
 
-All the messages sent to the users are located inside `lib/Service/MessageProvider.php`.
-To overwrite then for internal usage, you need to create a new class inheriting from the
-MessageProvider and then overwrite any methods with your own messages.
+The messages sent to users are defined at `lib/Service/MessageProvider.php`.
 
-You can then edit your config.php to tell this app to use your MessageProvider instead.
+To overwrite the default messages, create a new class inheriting from `MessageProvider`
+and overwrite the desired methods.
+
+Then configure your `MessageProvider` in `config.php`:
 
 ```php
 [
@@ -19,23 +24,23 @@ You can then edit your config.php to tell this app to use your MessageProvider i
 
 ## Mail sending limits
 
-This app will try to spread out as much as possible the amount of mails sent at the same
-time and will send them per batch each hour with a maximum of 1000 per hour. This limits
-can be changed with the `status-email-max-mail-sent` in app config:
-
+In order to avoid mail floods, the app sends mails in hourly batches. Default maximum
+is 1000 mails per hour. This limit can be changed via `status-email-max-mail-sent` in
+the app config:
 
 ```bash
 php occ config:app:set monthly_status_email status-email-max-mail-sent --value=2500
 ```
 
-## Sending welcome status emails
+## Sending welcome mails
 
-By default users will get initial mail when they log in for the first time. 
-This can be disabled through the following switch in config.php:
+By default, this app sends a welcome mail to new users after they logged in for
+the first time. This can be disabled with the following switch in config.php:
+
 ```php
 [
     ...,
-    'status-email-send-first-login-mail' => true
+    'status-email-send-first-login-mail' => false
 ]
 ```
 

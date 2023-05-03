@@ -1,3 +1,10 @@
-# PHP Coding Style
+build/
+node_modules
 vendor/
+
+# Editor directories and files
+.idea/
+
+# Cache files
+.phpunit.result.cache
 .php-cs-fixer.cache

@@ -2,12 +2,14 @@
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>monthly_status_email</id>
-    <name>Monthly Status Email</name>
-    <summary>Monthly notifications with storage usage and tips and tricks</summary>
-    <description>Monthly notifications with some storage usage information and tips and tricks.</description>
+    <name>Monthly Status Mails</name>
+    <summary>Send monthly status mails to users</summary>
+    <description>Monthly notifications, e.g. summary of used storage and usage hints.</description>
     <version>1.0.9</version>
     <licence>agpl</licence>
     <author>Carl Schwan</author>
+    <author>Jonas Meurer</author>
+    <author>Vitor Mattos</author>
     <namespace>MonthlyStatusEmail</namespace>
     <category>social</category>
     <bugs>https://github.com/nextcloud/monthly_status_email/issues</bugs>
