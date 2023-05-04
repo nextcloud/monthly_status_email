@@ -1,24 +1,29 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
-      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <id>monthly_status_email</id>
-    <name>Monthly Status Mails</name>
-    <summary>Send monthly status mails to users</summary>
-    <description>Monthly notifications, e.g. summary of used storage and usage hints.</description>
-    <version>1.0.9</version>
-    <licence>agpl</licence>
-    <author>Carl Schwan</author>
-    <author>Jonas Meurer</author>
-    <author>Vitor Mattos</author>
-    <namespace>MonthlyStatusEmail</namespace>
-    <category>social</category>
-    <bugs>https://github.com/nextcloud/monthly_status_email/issues</bugs>
-    <dependencies>
-        <nextcloud min-version="22" max-version="25" />
-    </dependencies>
-    <background-jobs>
-        <job>OCA\MonthlyStatusEmail\Jobs\SendNotificationsJob</job>
-    </background-jobs>
+	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+	<id>monthly_status_email</id>
+	<name>Monthly Status Mails</name>
+	<summary>Send monthly status mails to users</summary>
+	<description>Monthly notifications, e.g. summary of used storage and usage hints.</description>
+	<version>1.0.9</version>
+	<licence>agpl</licence>
+	<author>Carl Schwan</author>
+	<author>Jonas Meurer</author>
+	<author>Vitor Mattos</author>
+	<namespace>MonthlyStatusEmail</namespace>
+	<category>social</category>
+	<bugs>https://github.com/nextcloud/monthly_status_email/issues</bugs>
+	<dependencies>
+		<nextcloud min-version="22" max-version="25" />
+	</dependencies>
+	<background-jobs>
+		<job>OCA\MonthlyStatusEmail\Jobs\SendNotificationsJob</job>
+	</background-jobs>
+	<repair-steps>
+		<post-migration>
+			<step>OCA\MonthlyStatusEmail\Migration\InitDatabase</step>
+		</post-migration>
+	</repair-steps>
 	<commands>
 		<command>OCA\MonthlyStatusEmail\Command\SendMail</command>
 		<command>OCA\MonthlyStatusEmail\Command\SendAllMail</command>
@@ -26,9 +31,4 @@
 	<settings>
 		<personal>OCA\MonthlyStatusEmail\Settings\PersonalSettings</personal>
 	</settings>
-	<repair-steps>
-		<post-migration>
-			<step>OCA\MonthlyStatusEmail\Migration\InitDatabase</step>
-		</post-migration>
-	</repair-steps>
 </info>
