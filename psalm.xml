@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <psalm
 	errorLevel="5"
-	resolveFromConfigFile="true"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="https://getpsalm.org/schema/config"
 	xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
@@ -17,49 +16,23 @@
 		</ignoreFiles>
 	</projectFiles>
 	<extraFiles>
-		<directory name="vendor" />
-		<ignoreFiles>
-			<directory name="vendor/phpunit" />
-			<directory name="vendor/psalm" />
-		</ignoreFiles>
+        <directory name="vendor/nextcloud/ocp" />
 	</extraFiles>
 	<issueHandlers>
 		<UndefinedClass>
 			<errorLevel type="suppress">
-				<referencedClass name="Doctrine\DBAL\Exception" />
-				<referencedClass name="Doctrine\DBAL\Exception\InvalidFieldNameException" />
-				<referencedClass name="Doctrine\DBAL\Exception\TableNotFoundException" />
-				<referencedClass name="Doctrine\DBAL\Exception\UniqueConstraintViolationException" />
-				<referencedClass name="Doctrine\DBAL\Platforms\PostgreSQL94Platform" />
 				<referencedClass name="Doctrine\DBAL\Types\Types" />
-				<referencedClass name="GuzzleHttp\Exception\ClientException" />
-				<referencedClass name="OC" />
-				<referencedClass name="OCA\FederatedFileSharing\AddressHandler" />
-				<referencedClass name="OCA\Files_Sharing\SharedStorage" />
 			</errorLevel>
 		</UndefinedClass>
 		<UndefinedDocblockClass>
 			<errorLevel type="suppress">
 				<referencedClass name="Doctrine\DBAL\Driver\Statement" />
-				<referencedClass name="Doctrine\DBAL\Exception" />
-				<referencedClass name="Doctrine\DBAL\Exception\UniqueConstraintViolationException" />
 				<referencedClass name="Doctrine\DBAL\Platforms\AbstractPlatform" />
 				<referencedClass name="Doctrine\DBAL\Schema\Schema" />
 				<referencedClass name="Doctrine\DBAL\Schema\SchemaException" />
 				<referencedClass name="Doctrine\DBAL\Schema\Table" />
-				<referencedClass name="OC\DB\ConnectionAdapter" />
-				<referencedClass name="OCA\FederatedFileSharing\AddressHandler" />
+				<referencedClass name="Doctrine\DBAL\Statement" />
 			</errorLevel>
 		</UndefinedDocblockClass>
-		<UndefinedInterfaceMethod>
-			<errorLevel type="suppress">
-				<referencedMethod name="OCP\IDBConnection::getInner" />
-			</errorLevel>
-		</UndefinedInterfaceMethod>
-		<InvalidThrow>
-			<errorLevel type="suppress">
-				<referencedClass name="Doctrine\DBAL\Exception\UniqueConstraintViolationException" />
-			</errorLevel>
-		</InvalidThrow>
 	</issueHandlers>
 </psalm>

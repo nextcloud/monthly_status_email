@@ -111,3 +111,9 @@ namespace OC\Files {
 		public function getAbsolutePath(string $path): string {}
 	}
 }
+
+namespace OC\Files\Storage {
+	interface Storage extends \OCP\Files\Storage {
+		public function instanceOfStorage($class) {}
+	}
+}
