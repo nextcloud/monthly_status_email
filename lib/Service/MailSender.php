@@ -25,9 +25,9 @@ declare(strict_types=1);
 
 namespace OCA\MonthlyStatusEmail\Service;
 
-use OCP\Files\FileInfo;
 use OCA\MonthlyStatusEmail\Db\NotificationTracker;
 use OCP\DB\Exception;
+use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IServerContainer;

@@ -27,12 +27,12 @@ namespace OCA\MonthlyStatusEmail\Controller;
 use OCA\MonthlyStatusEmail\Service\MailSender;
 use OCA\MonthlyStatusEmail\Service\NotFoundException;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\IRequest;
-use OCP\AppFramework\Controller;
 use OCP\IUserSession;
 
 /**

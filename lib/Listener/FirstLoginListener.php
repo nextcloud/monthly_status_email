@@ -29,9 +29,9 @@ namespace OCA\MonthlyStatusEmail\Listener;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NotFoundException;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
+use OCP\IConfig;
 use OCP\IServerContainer;
 use OCP\IUser;
-use OCP\IConfig;
 use OCP\Mail\IMailer;
 
 // TODO port to IListener

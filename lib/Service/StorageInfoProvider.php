@@ -4,8 +4,8 @@
 namespace OCA\MonthlyStatusEmail\Service;
 
 use OC\Files\Storage\Wrapper\Quota;
-use OCP\IUser;
 use OCP\Files\IRootFolder;
+use OCP\IUser;
 
 class StorageInfoProvider {
 	/**
