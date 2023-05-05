@@ -40,40 +40,41 @@ use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
 use OCP\Mail\IMessage;
 use OCP\Share\IManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Test\TestCase;
 
 class MailSenderTest extends TestCase {
 	/**
-	 * @var NotificationTrackerService|\PHPUnit\Framework\MockObject\MockObject
+	 * @var NotificationTrackerService|MockObject
 	 */
 	private $service;
 	/**
-	 * @var IMailer|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IMailer|MockObject
 	 */
 	private $mailer;
 	/**
-	 * @var MessageProvider|\PHPUnit\Framework\MockObject\MockObject
+	 * @var MessageProvider|MockObject
 	 */
 	private $provider;
 	/**
-	 * @var StorageInfoProvider|\PHPUnit\Framework\MockObject\MockObject
+	 * @var StorageInfoProvider|MockObject
 	 */
 	private $storageInfoProvider;
 	/**
-	 * @var ClientDetector|\PHPUnit\Framework\MockObject\MockObject
+	 * @var ClientDetector|MockObject
 	 */
 	private $clientDetector;
 	/**
-	 * @var NoFileUploadedDetector|\PHPUnit\Framework\MockObject\MockObject
+	 * @var NoFileUploadedDetector|MockObject
 	 */
 	private $noFileUploadedDetector;
 	/**
-	 * @var IManager|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IManager|MockObject
 	 */
 	private $shareManager;
 	/**
-	 * @var IUserManager|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IUserManager|MockObject
 	 */
 	private $userManager;
 	/**
@@ -81,15 +82,19 @@ class MailSenderTest extends TestCase {
 	 */
 	private $mailSender;
 	/**
+	 * @var IMessage
+	 */
+	private $message;
+	/**
 	 * @var NotificationTracker
 	 */
 	private $trackedNotification;
 	/**
-	 * @var IUser|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IUser|MockObject
 	 */
 	private $user;
 	/**
-	 * @var IEMailTemplate|\PHPUnit\Framework\MockObject\MockObject
+	 * @var IEMailTemplate|MockObject
 	 */
 	private $template;
 
@@ -106,9 +111,9 @@ class MailSenderTest extends TestCase {
 			->willReturnCallback(function ($class) {
 				if ($class === MessageProvider::class) {
 					return $this->provider;
-				} else {
-					return \OC::$server->get($class);
 				}
+
+				return \OC::$server->get($class);
 			});
 		$this->userManager = $this->createMock(IUserManager::class);
 		$this->shareManager = $this->createMock(IManager::class);
@@ -130,10 +135,10 @@ class MailSenderTest extends TestCase {
 			$this->container
 		);
 
-		$message = $this->createMock(IMessage::class);
+		$this->message = $this->createMock(IMessage::class);
 		$this->mailer->expects($this->once())
 			->method('createMessage')
-			->willReturn($message);
+			->willReturn($this->message);
 
 		$this->trackedNotification = new NotificationTracker();
 		$this->trackedNotification->setOptedOut(false);
@@ -158,13 +163,13 @@ class MailSenderTest extends TestCase {
 			->method('createEmailTemplate')
 			->withAnyParameters()
 			->willReturn($this->template);
-
-		$message->expects($this->once())
-			->method('useTemplate')
-			->with($this->template);
 	}
 
-	public function testStorageEmpty() {
+	public function testStorageEmpty(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -179,7 +184,11 @@ class MailSenderTest extends TestCase {
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 
-	public function testStorageWarning() {
+	public function testStorageWarning(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -194,7 +203,11 @@ class MailSenderTest extends TestCase {
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 
-	public function testStorageSafe() {
+	public function testStorageSafe(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -223,7 +236,11 @@ class MailSenderTest extends TestCase {
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
 	}
 
-	public function testShare() {
+	public function testShare(): void {
+		$this->message->expects($this->once())
+			->method('useTemplate')
+			->with($this->template);
+
 		$this->storageInfoProvider->expects($this->once())
 			->method('getStorageInfo')
 			->willReturn([
@@ -249,5 +266,30 @@ class MailSenderTest extends TestCase {
 			->method('writeShareMessage');
 
 		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+	}
+
+	public function testOptedOutUpdateTimestamp(): void {
+		$this->storageInfoProvider->expects($this->once())
+			->method('getStorageInfo')
+			->willReturn([
+				'quota' => 100,
+				'used' => 50,
+				'usage_relative' => 50,
+			]);
+
+		$this->trackedNotification->setOptedOut(true);
+
+		$timestamp = $this->trackedNotification->getLastSendNotification();
+		sleep(1);
+
+		// NotificationTrackerService->update() gets TrackedNotification with updated timestamp
+		$this->service
+			->expects($this->once())
+			->method('update')
+			->willReturnCallback(function ($trackedNotification) use ($timestamp) {
+				self::assertGreaterThan($timestamp, $trackedNotification->getLastSendNotification());
+			});
+
+		self::assertFalse($this->mailSender->sendMonthlyMailTo($this->trackedNotification));
 	}
 }

@@ -205,6 +205,8 @@ class MailSender {
 			// People opting-out of the monthly emails should still get the
 			// 'urgent' email about running out of storage, but the rest
 			// shouldn't be sent.
+			$trackedNotification->setLastSendNotification(time());
+			$this->service->update($trackedNotification);
 			return false;
 		}
 
