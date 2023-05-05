@@ -3,7 +3,7 @@
  *
  * @author Carl Schwan <carl@carlschwan.eu>
  *
- * @license GNU AGPL version 3 or any later version
+ * @license AGPL-3.0-or-later
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,12 +21,13 @@
  */
 
 import Vue from 'vue'
-import App from './components/PersonalSettings.vue'
+import PersonalSettings from './components/PersonalSettings.vue'
 
-// bind to window
-Vue.prototype.OC = OC
 Vue.prototype.t = t
+Vue.prototype.n = n
+Vue.prototype.OC = OC
+Vue.prototype.OCA = OCA
 
-const View = Vue.extend(App)
+const View = Vue.extend(PersonalSettings)
 const setting = new View()
 setting.$mount('#monthly-notifications-settings')
