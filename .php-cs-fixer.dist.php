@@ -14,8 +14,5 @@ $config
 	->notPath('l10n')
 	->notPath('src')
 	->notPath('vendor')
-	->exclude('composer')
-	->exclude('3rdparty')
-	->exclude('build')
 	->in(__DIR__);
 return $config;

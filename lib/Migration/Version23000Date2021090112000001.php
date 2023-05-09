@@ -28,8 +28,8 @@ namespace OCA\MonthlyStatusEmail\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
-use OCP\Migration\SimpleMigrationStep;
 use OCP\Migration\IOutput;
+use OCP\Migration\SimpleMigrationStep;
 
 class Version23000Date2021090112000001 extends SimpleMigrationStep {
 	/**

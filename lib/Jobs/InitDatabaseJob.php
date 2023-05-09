@@ -27,8 +27,8 @@ declare(strict_types=1);
 namespace OCA\MonthlyStatusEmail\Jobs;
 
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
-use OCP\BackgroundJob\QueuedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\QueuedJob;
 use OCP\IUser;
 use OCP\IUserManager;
 
