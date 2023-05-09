@@ -27,6 +27,7 @@ namespace OCA\MonthlyStatusEmail\Settings;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
+use OCP\IConfig;
 use OCP\IUserSession;
 use OCP\Settings\ISettings;
 
@@ -43,32 +44,49 @@ class PersonalSettings implements ISettings {
 	 * @var IUserSession
 	 */
 	private $userSession;
+	/**
+	 * @var string
+	 */
+	private $ncVersion;
 
 	public function __construct(
 		IInitialState $initialState,
 		NotificationTrackerService $service,
-		IUserSession $userSession
+		IUserSession $userSession,
+		IConfig $config
 	) {
 		$this->initialState = $initialState;
 		$this->service = $service;
 		$this->userSession = $userSession;
+		$this->ncVersion = $config->getSystemValueString('version', '0.0.0');
 	}
 
 	/**
 	 * @return TemplateResponse
 	 */
 	public function getForm(): TemplateResponse {
-		$this->initialState->provideInitialState('opted-out', $this->service->find($this->userSession->getUser()->getUID())->getOptedOut());
+		if (null !== $user = $this->userSession->getUser()) {
+			$this->initialState->provideInitialState(
+				'opted-out',
+				$this->service->find($user->getUID())->getOptedOut());
+		}
 		return new TemplateResponse('monthly_status_email', 'settings-personal', []);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * @return string
+	 */
 	public function getSection(): string {
-		return 'activity';
+		if (version_compare($this->ncVersion, '23.0.0', '<')) {
+			return 'activity';
+		}
+		return 'notifications';
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * @return int
+	 */
 	public function getPriority(): int {
-		return 0;
+		return 50;
 	}
 }

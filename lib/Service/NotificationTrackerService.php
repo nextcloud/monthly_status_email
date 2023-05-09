@@ -57,7 +57,9 @@ class NotificationTrackerService {
 	}
 
 	/**
-	 * @throws NotFoundException
+	 * @param string $userId
+	 *
+	 * @return NotificationTracker
 	 */
 	public function find(string $userId): NotificationTracker {
 		try {
