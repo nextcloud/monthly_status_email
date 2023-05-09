@@ -1,4 +1,6 @@
-# 1.10.0
+# Changelog
+
+## [1.10.0] - 2023-05-09
 
 - Add support for Nextcloud 26 and 27
 - Fix displaying personal settings in Nextcloud >= 23.0.0
@@ -6,7 +8,7 @@
 - Slightly improve wording in app description and documentation
 - Update PHP + NPM dependencies
 
-# 1.0.9
+## [1.0.9] - 2022-06-22
 
 - Handle not logged in users
 - Fix getting consecutive storage info
