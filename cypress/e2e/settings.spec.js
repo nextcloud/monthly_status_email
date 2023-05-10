@@ -11,7 +11,11 @@ describe('Personal settings', function() {
 	})
 
 	it('Toggle monthly_status_email settings', function() {
-		cy.visit('/settings/user/notifications')
+		if (Cypress.env('ncVersion') === 'stable22') {
+			cy.visit('/settings/user/activity')
+		} else {
+			cy.visit('/settings/user/notifications')
+		}
 		cy.get('#monthly-notifications-settings')
 			.should('contain', 'Monthly Status Email')
 		cy.get('#monthly-notifications-settings input#send-notifications')

@@ -46,6 +46,11 @@ jobs:
         php-versions: ['8.0']
         databases: ['sqlite']
         server-versions: ['stable25', 'master']
+        include:
+          - php-versions: '7.3'
+            server-versions: 'stable22'
+          - php-versions: '7.4'
+            server-versions: 'stable23'
 
     steps:
       - name: Set app env
@@ -125,6 +130,7 @@ jobs:
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
           COMMIT_INFO_SHA: ${{ github.event.pull_request.head.sha }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          CYPRESS_ncVersion: ${{ matrix.server-versions }}
 
       - name: Upload test failure screenshots
         uses: actions/upload-artifact@v3
