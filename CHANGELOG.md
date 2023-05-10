@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.10.0] - 2023-05-09
+## [1.1.0] - 2023-05-09
 
 - Add support for Nextcloud 26 and 27
 - Fix displaying personal settings in Nextcloud >= 23.0.0
