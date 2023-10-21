@@ -23,7 +23,7 @@ jobs:
     name: update-nextcloud-ocp-${{ matrix.branches }}
 
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           ref: ${{ matrix.branches }}
           submodules: true
@@ -38,11 +38,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Read codeowners
+        id: codeowners
+        run: |
+          grep '/appinfo/info.xml' .github/CODEOWNERS | cut -f 2- -d ' ' | xargs | awk '{ print "codeowners="$0 }' >> $GITHUB_OUTPUT
+        continue-on-error: true
+
       - name: Composer install
         run: composer install
 
       - name: Composer update nextcloud/ocp
+        id: update_branch
         run: composer require --dev nextcloud/ocp:dev-${{ matrix.target }}
+
+      - name: Raise on issue on failure
+        uses: dacbd/create-issue-action@ba4d1c45cccf9c483f2720cefb40e437f0ee6f7d # v1.2.1
+        if: ${{ failure() && steps.update_branch.conclusion == 'failure' }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Failed to update nextcloud/ocp package}
+          body: Please check the output of the GitHub action and manually resolve the issues<br>${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}<br>${{ steps.codeowners.outputs.codeowners }}
 
       - name: Reset checkout 3rdparty
         run: |
@@ -63,7 +78,7 @@ jobs:
         continue-on-error: true
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@284f54f989303d2699d373481a0cfa13ad5a6666 # v3
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # v3
         with:
           token: ${{ secrets.COMMAND_BOT_PAT }}
           commit-message: "chore(dev-deps): Bump nextcloud/ocp package"
