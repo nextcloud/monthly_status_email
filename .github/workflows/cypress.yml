@@ -1,38 +1,14 @@
 name: Cypress
 
-on:
-  pull_request:
-    paths:
-      - '.github/workflows/**'
-      - 'appinfo/**'
-      - 'cypress/**'
-      - 'l10n/**'
-      - 'lib/**'
-      - 'src/**'
-      - 'templates/**'
-      - '.php-cs-fixer.dist.php'
-      - 'babel.config.js'
-      - 'composer.json'
-      - 'composer.lock'
-      - 'cypress.json'
-      - 'package.json'
-      - 'package-lock.json'
-
-  push:
-    branches:
-      - main
-      - master
-      - stable*
-
-permissions:
-  contents: read
+on: pull_request
 
 concurrency:
   group: cypress-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 env:
-  APP_NAME: monthly_status_email
+  # Adjust APP_NAME if your repository name is different
+  APP_NAME: ${{ github.event.repository.name }}
   CYPRESS_baseUrl: http://localhost:8081/index.php
 
 jobs:
@@ -59,21 +35,21 @@ jobs:
           echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        uses: shivammathur/setup-php@e6f75134d35752277f093989e72e140eaa222f35 # v2
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: mbstring, iconv, fileinfo, intl, sqlite, pdo_sqlite, gd
           coverage: none
 
       - name: Checkout server
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout app
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           path: apps/${{ env.APP_NAME }}
 
@@ -86,7 +62,7 @@ jobs:
           fallbackNpm: '^9'
 
       - name: Set up node ${{ steps.versions.outputs.nodeVersion }}
-        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
           node-version: ${{ steps.versions.outputs.nodeVersion }}
 
@@ -94,7 +70,7 @@ jobs:
         run: npm i -g npm@"${{ steps.versions.outputs.npmVersion }}"
 
       - name: Setup NPM cache
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
           cache: 'npm'
           cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
@@ -120,7 +96,7 @@ jobs:
           PHP_CLI_SERVER_WORKERS: 3
 
       - name: Cypress run
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@ebe8b24c4428922d0f793a5c4c96853a633180e3 # v6.6.0
         with:
           record: true
           wait-on: '${{ env.CYPRESS_baseUrl }}'
@@ -135,7 +111,7 @@ jobs:
           CYPRESS_ncVersion: ${{ matrix.server-versions }}
 
       - name: Upload test failure screenshots
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         if: failure()
         with:
           name: Screenshots.${{ matrix.server-versions }}
@@ -143,7 +119,7 @@ jobs:
           retention-days: 5
 
       - name: Upload nextcloud logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         if: failure()
         with:
           name: ${{ matrix.server-versions }}.log
