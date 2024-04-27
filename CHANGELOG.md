@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.0] - 2024-04-27
+
+- Add support for Nextcloud 29
+- Update PHP + NPM dependencies
+
 ## [1.2.0] - 2024-02-12
 
 - Add support for Nextcloud 28
