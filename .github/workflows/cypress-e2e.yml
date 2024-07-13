@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023-2024 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+
 name: Cypress
 
 on: pull_request
@@ -12,8 +15,38 @@ env:
   CYPRESS_baseUrl: http://localhost:8081/index.php
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest-low
+
+    outputs:
+      src: ${{ steps.changes.outputs.src}}
+
+    steps:
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: changes
+        continue-on-error: true
+        with:
+          filters: |
+            src:
+              - '.github/workflows/**'
+              - 'appinfo/**'
+              - 'lib/**'
+              - 'src/**'
+              - 'templates/**'
+              - 'babel.config.js'
+              - 'composer.json'
+              - 'composer.lock'
+              - 'cypress.config.js'
+              - 'package.json'
+              - 'package-lock.json'
+              - '**.js'
+              - '**.ts'
+              - '**.vue'
+
   cypress:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.src != 'false'
 
     strategy:
       fail-fast: false
@@ -26,62 +59,65 @@ jobs:
             server-versions: 'stable22'
           - php-versions: '7.4'
             server-versions: 'stable23'
+        exclude:
           - php-versions: '8.0'
             server-versions: 'stable25'
 
-    steps:
-      - name: Set app env
-        run: |
-          # Split and keep last
-          echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: true
 
+    name: runner ${{ matrix.containers }} (${{ matrix.server-versions }})
+
+    steps:
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@e6f75134d35752277f093989e72e140eaa222f35 # v2
+        uses: shivammathur/setup-php@c541c155eee45413f5b09a52248675b1a2575231 # v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, iconv, fileinfo, intl, sqlite, pdo_sqlite, gd
+          # https://docs.nextcloud.com/server/stable/admin_manual/installation/source_installation.html#prerequisites-for-manual-installation
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, sqlite, pdo_sqlite
           coverage: none
+          ini-file: development
 
       - name: Checkout server
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout app
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: apps/${{ env.APP_NAME }}
 
       - name: Read package.json node and npm engines version
-        uses: skjnldsv/read-package-engines-version-actions@8205673bab74a63eb9b8093402fd9e0e018663a1 # v2.2
+        uses: skjnldsv/read-package-engines-version-actions@06d6baf7d8f41934ab630e97d9e6c0bc9c9ac5e4 # v3
         id: versions
         with:
-          path: apps/${{ env.APP_NAME }}
           fallbackNode: "^20"
           fallbackNpm: "^10"
+          path: apps/${{ env.APP_NAME }}
 
       - name: Set up node ${{ steps.versions.outputs.nodeVersion }}
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: ${{ steps.versions.outputs.nodeVersion }}
 
       - name: Set up npm ${{ steps.versions.outputs.npmVersion }}
-        run: npm i -g npm@"${{ steps.versions.outputs.npmVersion }}"
+        run: npm i -g 'npm@${{ steps.versions.outputs.npmVersion }}'
 
       - name: Setup NPM cache
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           cache: 'npm'
           cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
           # cypress will install dependencies
 
-      - name: Install dependencies & build
+      - name: Install node dependencies & build app
         working-directory: apps/${{ env.APP_NAME }}
         run: |
           npm ci
-          npm run build --if-present
+          TESTING=true npm run build --if-present
 
       - name: Set up Nextcloud
         env:
@@ -96,8 +132,8 @@ jobs:
         env:
           PHP_CLI_SERVER_WORKERS: 3
 
-      - name: Cypress run
-        uses: cypress-io/github-action@ebe8b24c4428922d0f793a5c4c96853a633180e3 # v6.6.0
+      - name: Run E2E cypress tests
+        uses: cypress-io/github-action@8d3918616d8ac34caa2b49afc8b408b6a872a6f5 # v6.7.1
         with:
           record: true
           wait-on: '${{ env.CYPRESS_baseUrl }}'
@@ -112,22 +148,24 @@ jobs:
           CYPRESS_ncVersion: ${{ matrix.server-versions }}
 
       - name: Upload snapshots
-        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         if: failure()
         with:
-          name: snapshots_${{ matrix.server-versions }}
+          name: Screenshots.${{ matrix.server-versions }}-${{ matrix.containers }}
           path: apps/${{ env.APP_NAME }}/cypress/screenshots/
+          retention-days: 5
 
       - name: Upload NC logs
-        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
-        if: failure()
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        if: always()
         with:
-          name: nc_logs_${{ matrix.server-versions }}.log
+          name: ${{ matrix.server-versions }}-${{ matrix.containers }}.log
           path: data/nextcloud.log
+          retention-days: 5
 
   summary:
-    runs-on: ubuntu-latest
-    needs: cypress
+    runs-on: ubuntu-latest-low
+    needs: [changes, cypress]
 
     if: always()
 
@@ -135,4 +173,4 @@ jobs:
 
     steps:
       - name: Summary status
-        run: if ${{ needs.cypress.result != 'success' }}; then exit 1; fi
+        run: if ${{ needs.changes.outputs.src != 'false' && ( needs.cypress.result != 'success' && needs.cypress.result != 'skipped' ) }}; then exit 1; fi
