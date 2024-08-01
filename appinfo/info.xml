@@ -5,16 +5,15 @@
 	<name>Monthly Status Mails</name>
 	<summary>Send monthly status mails to users</summary>
 	<description>Monthly notifications, e.g. summary of used storage and usage hints.</description>
-	<version>1.3.0</version>
+	<version>1.4.0</version>
 	<licence>agpl</licence>
 	<author>Carl Schwan</author>
 	<author>Jonas Meurer</author>
-	<author>Vitor Mattos</author>
 	<namespace>MonthlyStatusEmail</namespace>
 	<category>social</category>
 	<bugs>https://github.com/nextcloud/monthly_status_email/issues</bugs>
 	<dependencies>
-		<nextcloud min-version="22" max-version="29" />
+		<nextcloud min-version="22" max-version="30" />
 	</dependencies>
 	<background-jobs>
 		<job>OCA\MonthlyStatusEmail\Jobs\SendNotificationsJob</job>
