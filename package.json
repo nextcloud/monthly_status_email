@@ -32,7 +32,7 @@
 		"@nextcloud/logger": "^3.0.2",
 		"@nextcloud/paths": "^2.2.1",
 		"@nextcloud/router": "^3.0.1",
-		"vue": "^2.7.15"
+		"vue": "^3.5.13"
 	},
 	"devDependencies": {
 		"@cypress/browserify-preprocessor": "^3.0.2",
