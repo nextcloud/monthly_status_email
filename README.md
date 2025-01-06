@@ -4,6 +4,8 @@
 -->
 # Montly Status email
 
+[![REUSE status](https://api.reuse.software/badge/github.com/nextcloud/monthly_status_email)](https://api.reuse.software/info/github.com/nextcloud/monthly_status_email)
+
 Send monthly status mails to users. This app doesn't provide a user interface.
 
 Per default it sends a summary of used storage along with some usage hints.
