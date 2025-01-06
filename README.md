@@ -1,4 +1,10 @@
+<!--
+  - SPDX-FileCopyrightText: 2021 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 # Montly Status email
+
+[![REUSE status](https://api.reuse.software/badge/github.com/nextcloud/monthly_status_email)](https://api.reuse.software/info/github.com/nextcloud/monthly_status_email)
 
 Send monthly status mails to users. This app doesn't provide a user interface.
 
