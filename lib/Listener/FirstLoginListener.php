@@ -12,28 +12,30 @@ namespace OCA\MonthlyStatusEmail\Listener;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NotFoundException;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
+use OCP\EventDispatcher\Event;
+use OCP\EventDispatcher\IEventListener;
 use OCP\IConfig;
 use OCP\IServerContainer;
 use OCP\IUser;
 use OCP\Mail\IMailer;
+use OCP\User\Events\UserFirstTimeLoggedInEvent;
+use Psr\Container\ContainerInterface;
 
-// TODO port to IListener
-class FirstLoginListener {
-	/** @var IMailer */
-	private $mailer;
-	/** @var NotificationTrackerService */
-	private $service;
-	/** @var MessageProvider */
-	private $provider;
-	/** @var string */
-	private $entity;
-	/** @var bool */
-	private $enabled;
+/**
+ * @template-implements IEventListener<UserFirstTimeLoggedInEvent>
+ */
+class FirstLoginListener implements IEventListener {
+	private MessageProvider $provider;
+	private string $entity;
+	private bool $enabled;
 
-	public function __construct(IMailer $mailer, NotificationTrackerService $service, IConfig $config, IServerContainer $container) {
+	public function __construct(
+		private readonly IMailer $mailer,
+		private readonly NotificationTrackerService $service,
+		IConfig $config,
+		ContainerInterface $container
+	) {
 		$this->enabled = $config->getSystemValueBool('status-email-send-first-login-mail', true);
-		$this->mailer = $mailer;
-		$this->service = $service;
 		$this->entity = strip_tags($config->getAppValue('theming', 'name', 'Nextcloud'));
 		$className = $config->getSystemValueString('status-email-message-provider', MessageProvider::class);
 		if (class_exists($className)) {
@@ -44,11 +46,16 @@ class FirstLoginListener {
 	}
 
 	/**
-	 * This methods handles sending the welcome mail on first logging for new
+	 * This method handles sending the welcome mail on first logging for new
 	 * users.
 	 * @throws NotFoundException
 	 */
-	public function handle(IUser $user): void {
+	public function handle(Event $event): void {
+		if (!$event instanceof UserFirstTimeLoggedInEvent) {
+			return;
+		}
+		$user = $event->getUser();
+
 		$to = $user->getEMailAddress();
 		if ($to === null) {
 			// We don't have any email address ignore the users. We can't send

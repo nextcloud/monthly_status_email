@@ -16,6 +16,7 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IUser;
+use OCP\User\Events\UserFirstTimeLoggedInEvent;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Application extends App implements IBootstrap {
@@ -26,18 +27,9 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(UserFirstTimeLoggedInEvent::class, FirstLoginListener::class);
 	}
 
 	public function boot(IBootContext $context): void {
-		$container = $context->getAppContainer();
-		$server = $context->getServerContainer();
-		/** @var FirstLoginListener $firstLoginListener */
-		$firstLoginListener = $container->get(FirstLoginListener::class);
-		$server->get(IEventDispatcher::class)
-			->addListener(IUser::class . '::firstLogin', function ($event) use ($firstLoginListener) {
-				if ($event instanceof GenericEvent) {
-					$firstLoginListener->handle($event->getSubject());
-				}
-			});
 	}
 }
