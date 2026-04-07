@@ -28,8 +28,8 @@ class FirstLoginListener implements IEventListener {
 	private bool $enabled;
 
 	public function __construct(
-		private readonly IMailer $mailer,
-		private readonly NotificationTrackerService $service,
+		private IMailer $mailer,
+		private NotificationTrackerService $service,
 		IConfig $config,
 		ContainerInterface $container,
 	) {

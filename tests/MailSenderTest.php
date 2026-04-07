@@ -31,8 +31,10 @@ use Psr\Log\LoggerInterface;
 use Test\TestCase;
 
 class MailSenderTest extends TestCase {
-	private NotificationTrackerService&MockObject $service;
-	private IMailer&MockObject $mailer;
+	/** @var NotificationTrackerService&MockObject */
+	private $service;
+	/** @var IMailer&MockObject */
+	private $mailer;
 	/**
 	 * @var MessageProvider|MockObject
 	 */

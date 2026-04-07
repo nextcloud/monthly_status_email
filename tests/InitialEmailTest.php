@@ -24,10 +24,13 @@ use Psr\Container\ContainerInterface;
 use Test\TestCase;
 
 class InitialEmailTest extends TestCase {
-	private NotificationTrackerService&MockObject $service;
-	private IMailer&MockObject $mailer;
+	/** @var NotificationTrackerService&MockObject */
+	private $service;
+	/** @var IMailer&MockObject */
+	private $mailer;
 	private FirstLoginListener $firstLoginListener;
-	private MessageProvider&MockObject $provider;
+	/** @var MessageProvider&MockObject */
+	private $provider;
 
 	public function setUp(): void {
 		parent::setUp();
