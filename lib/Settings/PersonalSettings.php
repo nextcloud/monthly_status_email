@@ -38,7 +38,7 @@ class PersonalSettings implements ISettings {
 		IInitialState $initialState,
 		NotificationTrackerService $service,
 		IUserSession $userSession,
-		IConfig $config
+		IConfig $config,
 	) {
 		$this->initialState = $initialState;
 		$this->service = $service;

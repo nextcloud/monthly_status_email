@@ -27,7 +27,7 @@ class SendAllMail extends Base {
 	public function __construct(
 		NotificationTrackerService $service,
 		IUserManager $userManager,
-		MailSender $mailSender
+		MailSender $mailSender,
 	) {
 		parent::__construct();
 		$this->userManager = $userManager;
@@ -37,8 +37,8 @@ class SendAllMail extends Base {
 
 	protected function configure() {
 		$this
-						->setName('monthly_status_email:send-all')
-						->setDescription('Send the notification mail to all users');
+			->setName('monthly_status_email:send-all')
+			->setDescription('Send the notification mail to all users');
 		parent::configure();
 	}
 

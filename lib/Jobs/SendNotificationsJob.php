@@ -44,7 +44,7 @@ class SendNotificationsJob extends TimedJob {
 		MailSender $mailSender,
 		IConfig $config,
 		NotificationTrackerService $service,
-		LoggerInterface $logger
+		LoggerInterface $logger,
 	) {
 		parent::__construct($time);
 		$this->setInterval(0); // 60 * 60); // every hour
@@ -61,7 +61,7 @@ class SendNotificationsJob extends TimedJob {
 	protected function run($argument): void {
 		$limit = (int)$this->config->getAppValue($this->appName, 'status-email-max-mail-sent', '1000');
 
-		$trackedNotifications = $this->service->findAllOlderThan(new \DateTime("-1 month"), $limit);
+		$trackedNotifications = $this->service->findAllOlderThan(new \DateTime('-1 month'), $limit);
 
 		// for debugging
 		// $trackedNotifications = $this->service->findAllOlderThan(new \DateTime('now'), $limit);

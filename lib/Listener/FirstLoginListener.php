@@ -15,8 +15,6 @@ use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\IConfig;
-use OCP\IServerContainer;
-use OCP\IUser;
 use OCP\Mail\IMailer;
 use OCP\User\Events\UserFirstTimeLoggedInEvent;
 use Psr\Container\ContainerInterface;
@@ -33,7 +31,7 @@ class FirstLoginListener implements IEventListener {
 		private readonly IMailer $mailer,
 		private readonly NotificationTrackerService $service,
 		IConfig $config,
-		ContainerInterface $container
+		ContainerInterface $container,
 	) {
 		$this->enabled = $config->getSystemValueBool('status-email-send-first-login-mail', true);
 		$this->entity = strip_tags($config->getAppValue('theming', 'name', 'Nextcloud'));

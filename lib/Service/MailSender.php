@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SPDX-FileCopyrightText: 2021 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -13,7 +14,6 @@ use OCP\DB\Exception;
 use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;
-use OCP\IServerContainer;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Mail\IEMailTemplate;
@@ -44,7 +44,7 @@ class MailSender {
 		private LoggerInterface $logger,
 		private NoFileUploadedDetector $noFileUploadedDetector,
 		private StorageInfoProvider $storageInfoProvider,
-		ContainerInterface $container
+		ContainerInterface $container,
 	) {
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
 		$className = $config->getSystemValueString('status-email-message-provider', MessageProvider::class);
@@ -80,7 +80,7 @@ class MailSender {
 	 * @param IEMailTemplate $emailTemplate
 	 * @param IUser $user
 	 * @return bool True if we should stop processing the condition after calling
-	 * this method.
+	 *              this method.
 	 */
 	private function handleStorage(IEMailTemplate $emailTemplate, IUser $user): bool {
 		$storageInfo = $this->storageInfoProvider->getStorageInfo($user);
