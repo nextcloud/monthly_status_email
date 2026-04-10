@@ -31,6 +31,8 @@ class InitialEmailTest extends TestCase {
 	private FirstLoginListener $firstLoginListener;
 	/** @var MessageProvider&MockObject */
 	private $provider;
+	/** @var IConfig&MockObject */
+	private $config;
 
 	public function setUp(): void {
 		parent::setUp();

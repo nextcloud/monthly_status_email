@@ -79,13 +79,15 @@ class MailSenderTest extends TestCase {
 	 * @var IEMailTemplate|MockObject
 	 */
 	private $template;
+	private IConfig $config;
+	/** @var ContainerInterface&MockObject */
+	private $container;
 
 	public function setUp(): void {
 		parent::setUp();
-		$config = Server::get(IConfig::class);
+		$this->config = Server::get(IConfig::class);
 		$this->mailer = $this->createMock(IMailer::class);
 		$this->service = $this->createMock(NotificationTrackerService::class);
-		$this->config = $config;
 		$this->container = $this->createMock(ContainerInterface::class);
 		$this->provider = $this->createMock(MessageProvider::class);
 		$this->container->expects($this->any())
@@ -130,6 +132,11 @@ class MailSenderTest extends TestCase {
 		$this->trackedNotification->setFirstTimeSent(false);
 
 		$this->user = $this->createMock(IUser::class);
+		$this->user->method('getUID')
+			->willReturn('user1');
+		$this->user->expects($this->once())
+			->method('getLastLogin')
+			->willReturn(1);
 		$this->user->expects($this->once())
 			->method('getEmailAddress')
 			->willReturn('user1@corp.corp');
@@ -215,7 +222,7 @@ class MailSenderTest extends TestCase {
 			->method('writeGenericMessage')
 			->with($this->template, $this->user, MessageProvider::NO_FILE_UPLOAD);
 
-		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+		$this->assertTrue($this->mailSender->sendMonthlyMailTo($this->trackedNotification));
 	}
 
 	public function testShare(): void {

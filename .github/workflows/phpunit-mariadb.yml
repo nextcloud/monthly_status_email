@@ -30,6 +30,8 @@ jobs:
       - name: Get version matrix
         id: versions
         uses: icewind1991/nextcloud-version-matrix@58becf3b4bb6dc6cef677b15e2fd8e7d48c0908f # v1.3.1
+        with:
+          matrix: '{"mariadb-versions": ["10.6", "10.11"]}'
 
   changes:
     runs-on: ubuntu-latest-low
@@ -65,17 +67,7 @@ jobs:
     if: needs.changes.outputs.src != 'false'
 
     strategy:
-      matrix:
-        php-versions: ${{ fromJson(needs.matrix.outputs.php-version) }}
-        server-versions: ${{ fromJson(needs.matrix.outputs.server-max) }}
-        mariadb-versions: ['10.6', '10.11']
-        include:
-          - php-versions: '7.3'
-            server-versions: 'stable22'
-            mariadb-versions: '10.6'
-          - php-versions: '7.4'
-            server-versions: 'stable23'
-            mariadb-versions: '10.6'
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
 
     name: MariaDB ${{ matrix.mariadb-versions }} PHP ${{ matrix.php-versions }} Nextcloud ${{ matrix.server-versions }}
 
