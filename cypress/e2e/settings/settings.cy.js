@@ -3,24 +3,23 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { randUser } from '../utils/index.js'
+import { randUser } from '../../utils/index.js'
 const user = randUser()
 
-describe('Personal settings', function() {
-	before(function() {
-		cy.createUser(user)
+describe('Personal settings', () => {
+	let user1
+
+	beforeEach(() => {
+		cy.createRandomUser()
+			.then(_user => {
+				user1 = _user
+			})
+
+		cy.login(user1)
 	})
 
-	beforeEach(function() {
-		cy.login(user)
-	})
-
-	it('Toggle monthly_status_email settings', function() {
-		if (Cypress.env('ncVersion') === 'stable22') {
-			cy.visit('/settings/user/activity')
-		} else {
-			cy.visit('/settings/user/notifications')
-		}
+	it('Toggle monthly_status_email settings', () => {
+		cy.visit('/settings/user/notifications')
 		cy.get('#monthly-notifications-settings')
 			.should('contain', 'Monthly Status Email')
 		cy.get('#monthly-notifications-settings input#send-notifications')
