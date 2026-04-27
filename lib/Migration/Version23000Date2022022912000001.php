@@ -15,14 +15,13 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
+use Psr\Log\LoggerInterface;
 
 class Version23000Date2022022912000001 extends SimpleMigrationStep {
-
-	/** @var IDBConnection */
-	protected $connection;
-
-	public function __construct(IDBConnection $connection) {
-		$this->connection = $connection;
+	public function __construct(
+		private IDBConnection $connection,
+		private LoggerInterface $logger,
+	) {
 	}
 
 	public function preSchemaChange(IOutput $output, Closure $schemaClosure, array $options) {
@@ -38,7 +37,7 @@ class Version23000Date2022022912000001 extends SimpleMigrationStep {
 		$rows = $result->fetchAll();
 		$result->closeCursor();
 
-		\OC::$server->getLogger()->critical(var_export($rows, true));
+		$this->logger->critical(var_export($rows, true));
 
 		$delete = $this->connection->getQueryBuilder();
 		$delete->delete('notification_tracker')

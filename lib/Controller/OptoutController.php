@@ -48,7 +48,7 @@ class OptoutController extends Controller {
 		IRequest $request,
 		IUserSession $session,
 		NotificationTrackerService $service,
-		MailSender $mailSender
+		MailSender $mailSender,
 	) {
 		parent::__construct($appName, $request);
 		$this->service = $service;

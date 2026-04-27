@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SPDX-FileCopyrightText: 2021 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -15,26 +16,24 @@ use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NoFileUploadedDetector;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCA\MonthlyStatusEmail\Service\StorageInfoProvider;
+use OCP\IConfig;
 use OCP\IL10N;
-use OCP\IServerContainer;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
 use OCP\Mail\IMessage;
+use OCP\Server;
 use OCP\Share\IManager;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Test\TestCase;
 
 class MailSenderTest extends TestCase {
-	/**
-	 * @var NotificationTrackerService|MockObject
-	 */
+	/** @var NotificationTrackerService&MockObject */
 	private $service;
-	/**
-	 * @var IMailer|MockObject
-	 */
+	/** @var IMailer&MockObject */
 	private $mailer;
 	/**
 	 * @var MessageProvider|MockObject
@@ -80,14 +79,16 @@ class MailSenderTest extends TestCase {
 	 * @var IEMailTemplate|MockObject
 	 */
 	private $template;
+	private IConfig $config;
+	/** @var ContainerInterface&MockObject */
+	private $container;
 
 	public function setUp(): void {
 		parent::setUp();
-		$config = \OC::$server->getConfig();
+		$this->config = Server::get(IConfig::class);
 		$this->mailer = $this->createMock(IMailer::class);
 		$this->service = $this->createMock(NotificationTrackerService::class);
-		$this->config = $config;
-		$this->container = $this->createMock(IServerContainer::class);
+		$this->container = $this->createMock(ContainerInterface::class);
 		$this->provider = $this->createMock(MessageProvider::class);
 		$this->container->expects($this->any())
 			->method('get')
@@ -96,7 +97,7 @@ class MailSenderTest extends TestCase {
 					return $this->provider;
 				}
 
-				return \OC::$server->get($class);
+				return Server::get($class);
 			});
 		$this->userManager = $this->createMock(IUserManager::class);
 		$this->shareManager = $this->createMock(IManager::class);
@@ -131,6 +132,11 @@ class MailSenderTest extends TestCase {
 		$this->trackedNotification->setFirstTimeSent(false);
 
 		$this->user = $this->createMock(IUser::class);
+		$this->user->method('getUID')
+			->willReturn('user1');
+		$this->user->expects($this->once())
+			->method('getLastLogin')
+			->willReturn(1);
 		$this->user->expects($this->once())
 			->method('getEmailAddress')
 			->willReturn('user1@corp.corp');
@@ -216,7 +222,7 @@ class MailSenderTest extends TestCase {
 			->method('writeGenericMessage')
 			->with($this->template, $this->user, MessageProvider::NO_FILE_UPLOAD);
 
-		$this->mailSender->sendMonthlyMailTo($this->trackedNotification);
+		$this->assertTrue($this->mailSender->sendMonthlyMailTo($this->trackedNotification));
 	}
 
 	public function testShare(): void {

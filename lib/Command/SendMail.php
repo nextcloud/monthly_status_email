@@ -28,7 +28,7 @@ class SendMail extends Base {
 	public function __construct(
 		NotificationTrackerService $service,
 		IUserManager $userManager,
-		MailSender $mailSender
+		MailSender $mailSender,
 	) {
 		parent::__construct();
 		$this->userManager = $userManager;
@@ -38,9 +38,9 @@ class SendMail extends Base {
 
 	protected function configure() {
 		$this
-						->setName('monthly_status_email:send')
-						->setDescription('Send the notification mail to a specific user')
-						->addArgument('user_id', InputArgument::REQUIRED, 'Id of the folder to configure');
+			->setName('monthly_status_email:send')
+			->setDescription('Send the notification mail to a specific user')
+			->addArgument('user_id', InputArgument::REQUIRED, 'Id of the folder to configure');
 		parent::configure();
 	}
 

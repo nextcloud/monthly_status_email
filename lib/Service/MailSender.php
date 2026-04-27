@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SPDX-FileCopyrightText: 2021 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -13,7 +14,6 @@ use OCP\DB\Exception;
 use OCP\Files\FileInfo;
 use OCP\IConfig;
 use OCP\IL10N;
-use OCP\IServerContainer;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Mail\IEMailTemplate;
@@ -21,6 +21,7 @@ use OCP\Mail\IMailer;
 use OCP\Mail\IMessage;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -29,72 +30,22 @@ use Psr\Log\LoggerInterface;
  * @package OCA\MonthlyStatusEmail\Service
  */
 class MailSender {
-
-	/** @var NotificationTrackerService $service */
-	private $service;
-
-	/** @var IUserManager $userManager */
-	private $userManager;
-
-	/** @var IConfig $config */
-	private $config;
-
-	/**
-	 * @var IMailer
-	 */
-	private $mailer;
-	/**
-	 * @var IL10N
-	 */
-	private $l;
-	/**
-	 * @var IManager
-	 */
-	private $shareManager;
-	/**
-	 * @var string
-	 */
-	private $entity;
-	/**
-	 * @var MessageProvider
-	 */
-	private $provider;
-	/**
-	 * @var ClientDetector
-	 */
-	private $clientDetector;
-	/**
-	 * @var LoggerInterface
-	 */
-	private $logger;
-	/**
-	 * @var NoFileUploadedDetector
-	 */
-	private $noFileUploadedDetector;
-	/**
-	 * @var StorageInfoProvider
-	 */
-	private $storageInfoProvider;
+	private string $entity;
+	private MessageProvider $provider;
 
 	public function __construct(
-		NotificationTrackerService $service,
-		IUserManager $userManager,
-		IConfig $config,
-		IMailer $mailer,
-		IL10N $l,
-		IManager $shareManager,
-		ClientDetector $clientDetector,
-		LoggerInterface $logger,
-		NoFileUploadedDetector $noFileUploadedDetector,
-		StorageInfoProvider $storageInfoProvider,
-		IServerContainer $container
+		private NotificationTrackerService $service,
+		private IUserManager $userManager,
+		private IConfig $config,
+		private IMailer $mailer,
+		private IL10N $l,
+		private IManager $shareManager,
+		private ClientDetector $clientDetector,
+		private LoggerInterface $logger,
+		private NoFileUploadedDetector $noFileUploadedDetector,
+		private StorageInfoProvider $storageInfoProvider,
+		ContainerInterface $container,
 	) {
-		$this->service = $service;
-		$this->userManager = $userManager;
-		$this->config = $config;
-		$this->mailer = $mailer;
-		$this->l = $l;
-		$this->shareManager = $shareManager;
 		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
 		$className = $config->getSystemValueString('status-email-message-provider', MessageProvider::class);
 		if (class_exists($className)) {
@@ -102,10 +53,6 @@ class MailSender {
 		} else {
 			$this->provider = $container->get(MessageProvider::class);
 		}
-		$this->clientDetector = $clientDetector;
-		$this->logger = $logger;
-		$this->noFileUploadedDetector = $noFileUploadedDetector;
-		$this->storageInfoProvider = $storageInfoProvider;
 	}
 
 	private function setUpMail(IMessage $message, NotificationTracker $trackedNotification, IUser $user): ?IEMailTemplate {
@@ -133,7 +80,7 @@ class MailSender {
 	 * @param IEMailTemplate $emailTemplate
 	 * @param IUser $user
 	 * @return bool True if we should stop processing the condition after calling
-	 * this method.
+	 *              this method.
 	 */
 	private function handleStorage(IEMailTemplate $emailTemplate, IUser $user): bool {
 		$storageInfo = $this->storageInfoProvider->getStorageInfo($user);

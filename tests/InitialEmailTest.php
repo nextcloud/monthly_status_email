@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SPDX-FileCopyrightText: 2021 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -12,51 +13,47 @@ use OCA\MonthlyStatusEmail\Db\NotificationTracker;
 use OCA\MonthlyStatusEmail\Listener\FirstLoginListener;
 use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
-use OCP\IServerContainer;
+use OCP\IConfig;
 use OCP\IUser;
 use OCP\Mail\IEMailTemplate;
 use OCP\Mail\IMailer;
+use OCP\Server;
+use OCP\User\Events\UserFirstTimeLoggedInEvent;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Container\ContainerInterface;
 use Test\TestCase;
 
 class InitialEmailTest extends TestCase {
-	/**
-	 * @var NotificationTrackerService|\PHPUnit\Framework\MockObject\MockObject
-	 */
+	/** @var NotificationTrackerService&MockObject */
 	private $service;
-	/**
-	 * @var IMailer|\PHPUnit\Framework\MockObject\MockObject
-	 */
+	/** @var IMailer&MockObject */
 	private $mailer;
-	/**
-	 * @var FirstLoginListener
-	 */
-	private $firstLoginListener;
-	/**
-	 * @var MessageProvider|\PHPUnit\Framework\MockObject\MockObject
-	 */
+	private FirstLoginListener $firstLoginListener;
+	/** @var MessageProvider&MockObject */
 	private $provider;
+	/** @var IConfig&MockObject */
+	private $config;
 
 	public function setUp(): void {
 		parent::setUp();
-		$config = \OC::$server->getConfig();
 		$this->mailer = $this->createMock(IMailer::class);
 		$this->service = $this->createMock(NotificationTrackerService::class);
-		$this->config = $config;
-		$this->container = $this->createMock(IServerContainer::class);
+		$this->config = Server::get(IConfig::class);
+		$container = $this->createMock(ContainerInterface::class);
 		$this->provider = $this->createMock(MessageProvider::class);
-		$this->container->expects($this->any())
+		$container->expects($this->any())
 			->method('get')
 			->willReturnCallback(function ($class) {
 				if ($class === MessageProvider::class) {
 					return $this->provider;
 				} else {
-					return \OC::$server->get($class);
+					return Server::get($class);
 				}
 			});
-		$this->firstLoginListener = new FirstLoginListener($this->mailer, $this->service, $this->config, $this->container);
+		$this->firstLoginListener = new FirstLoginListener($this->mailer, $this->service, $this->config, $container);
 	}
 
-	public function testUserNoEmail() {
+	public function testUserNoEmail(): void {
 		$user = $this->createMock(IUser::class);
 		$user->expects($this->once())
 			->method('getEmailAddress')
@@ -65,10 +62,11 @@ class InitialEmailTest extends TestCase {
 		$this->service->expects($this->never())
 			->method('find');
 
-		$this->firstLoginListener->handle($user);
+		$event = new UserFirstTimeLoggedInEvent($user);
+		$this->firstLoginListener->handle($event);
 	}
 
-	public function testSendEmail() {
+	public function testSendEmail(): void {
 		$user = $this->createMock(IUser::class);
 		$user->expects($this->once())
 			->method('getUid')
@@ -103,6 +101,7 @@ class InitialEmailTest extends TestCase {
 			->method('writeOptOutMessage')
 			->withAnyParameters();
 
-		$this->firstLoginListener->handle($user);
+		$event = new UserFirstTimeLoggedInEvent($user);
+		$this->firstLoginListener->handle($event);
 	}
 }

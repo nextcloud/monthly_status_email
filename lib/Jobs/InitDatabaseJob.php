@@ -28,7 +28,7 @@ class InitDatabaseJob extends QueuedJob {
 	public function __construct(
 		NotificationTrackerService $service,
 		IUserManager $userManager,
-		ITimeFactory $timeFactory
+		ITimeFactory $timeFactory,
 	) {
 		parent::__construct($timeFactory);
 		$this->service = $service;

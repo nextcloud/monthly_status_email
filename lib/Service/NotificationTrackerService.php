@@ -31,8 +31,8 @@ class NotificationTrackerService {
 	 * @return never
 	 */
 	private function handleException(\Exception $e) {
-		if ($e instanceof DoesNotExistException ||
-			$e instanceof MultipleObjectsReturnedException) {
+		if ($e instanceof DoesNotExistException
+			|| $e instanceof MultipleObjectsReturnedException) {
 			throw new NotFoundException($e->getMessage());
 		} else {
 			throw $e;

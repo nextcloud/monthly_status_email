@@ -59,7 +59,7 @@ class NotificationTracker extends Entity implements \JsonSerializable {
 	public function __construct() {
 		$this->addType('id', 'integer');
 		$this->addType('lastSendNotification', 'integer');
-		$this->addType('optedOut', 'bool');
+		$this->addType('optedOut', 'boolean');
 	}
 
 	/** {@inheritDoc} */
