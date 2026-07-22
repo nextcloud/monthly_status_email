@@ -336,7 +336,6 @@ EOF,
 				$this->writeClosing($emailTemplate);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
-
 			case self::NO_DESKTOP_CLIENT_CONNECTION:
 			case self::NO_MOBILE_CLIENT_CONNECTION:
 			case self::NO_CLIENT_CONNECTION:
@@ -355,42 +354,35 @@ EOF,
 				$this->writeClosing($emailTemplate);
 				$emailTemplate->addBodyButton('Zur ' . $this->productName . ' Sync Software', 'TODO', 'Zur ' . strip_tags($this->productName) . ' Sync Software');
 				return;
-
 			case self::NO_FILE_UPLOAD:
 				$emailTemplate->addBodyText('TODO message to send then there is no file uploded');
 				$this->writeClosing($emailTemplate);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
-
 			case self::TIP_MORE_STORAGE:
 				$emailTemplate->addBodyText('TODO message to advertise how to increase the storage outside of the out of storage place situation');
 				$this->writeClosing($emailTemplate);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
-
 			case self::TIP_DISCOVER_PARTNER:
 				$emailTemplate->addBodyText('TODO message to advertise partners');
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
-
 			case self::TIP_FILE_RECOVERY:
 				$emailTemplate->addBodyText('TODO message to explain how to recover data');
 				$this->writeClosing($emailTemplate);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
-
 			case self::TIP_EMAIL_CENTER:
 				$emailTemplate->addBodyText('TODO message to explain the email center');
 				$this->writeClosing($emailTemplate);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
-
 			case self::RECOMMEND_NEXTCLOUD:
 				$emailTemplate->addBodyText('TODO recommand service to family/friends');
 				$this->writeClosing($emailTemplate);
 				$emailTemplate->addBodyButton($this->productName . ' öffnen', $home, strip_tags($this->productName) . ' öffnen');
 				return;
-
 		}
 	}
 

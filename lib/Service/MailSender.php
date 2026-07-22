@@ -101,7 +101,6 @@ class MailSender {
 		}
 	}
 
-
 	/**
 	 * @return bool Whether a notification was sent
 	 */
