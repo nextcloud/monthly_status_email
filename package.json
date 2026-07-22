@@ -1,57 +1,57 @@
 {
-	"name": "monthly_status_email",
-	"description": "This application enable to send monthly summary to users about their disk usage.",
-	"author": "Carl Schwan <carl@carlschwan.eu>",
-	"license": "AGPL-3.0-or-later",
-	"repository": {
-		"url": "https://github.com/nextcloud/monthly_status_email",
-		"type": "git"
-	},
-	"scripts": {
-		"build": "NODE_ENV=production webpack --progress --config webpack.js",
-		"postbuild": "build-js/npm-post-build.sh",
-		"dev": "NODE_ENV=development webpack --progress --config webpack.js",
-		"watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
-		"lint": "eslint --ext .js,.vue src --max-warnings=0",
-		"lint:fix": "eslint --ext .js,.vue src --fix",
-		"stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/*.vue src/**/*.vue",
-		"stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix",
-		"cypress": "npm run cypress:e2e",
-		"cypress:e2e": "cypress run --e2e",
-		"cypress:gui": "cypress open"
-	},
-	"engines": {
-		"node": "^20.0.0",
-		"npm": "^10.0.0"
-	},
-	"browserslist": [
-		"extends @nextcloud/browserslist-config"
-	],
-	"dependencies": {
-		"@nextcloud/axios": "^2.5.1",
-		"@nextcloud/e2e-test-server": "^0.4.0",
-		"@nextcloud/initial-state": "^2.2.0",
-		"@nextcloud/l10n": "^3.1.0",
-		"@nextcloud/logger": "^3.0.2",
-		"@nextcloud/paths": "^2.2.1",
-		"@nextcloud/router": "^3.0.1",
-		"cypress-wait-until": "^3.0.2",
-		"vue": "^2.7.15"
-	},
-	"devDependencies": {
-		"@cypress/browserify-preprocessor": "^3.0.2",
-		"@nextcloud/babel-config": "^1.2.0",
-		"@nextcloud/browserslist-config": "^3.0.1",
-		"@nextcloud/cypress": "^1.0.0-beta.8",
-		"@nextcloud/eslint-config": "^8.4.1",
-		"@nextcloud/eslint-plugin": "^2.1.0",
-		"@nextcloud/stylelint-config": "^3.0.1",
-		"@nextcloud/webpack-vue-config": "^6.2.0",
-		"@testing-library/cypress": "^10.1.0",
-		"cypress": "^13.16.0",
-		"cypress-split": "^1.24.31",
-		"cypress-vite": "^1.8.0",
-		"eslint-plugin-cypress": "^3.5.0",
-		"vite-plugin-node-polyfills": "^0.26.0"
-	}
+  "name": "monthly_status_email",
+  "description": "This application enable to send monthly summary to users about their disk usage.",
+  "author": "Carl Schwan <carl@carlschwan.eu>",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "url": "https://github.com/nextcloud/monthly_status_email",
+    "type": "git"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production webpack --progress --config webpack.js",
+    "postbuild": "build-js/npm-post-build.sh",
+    "dev": "NODE_ENV=development webpack --progress --config webpack.js",
+    "watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
+    "lint": "eslint --ext .js,.vue src --max-warnings=0",
+    "lint:fix": "eslint --ext .js,.vue src --fix",
+    "stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/*.vue src/**/*.vue",
+    "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix",
+    "cypress": "npm run cypress:e2e",
+    "cypress:e2e": "cypress run --e2e",
+    "cypress:gui": "cypress open"
+  },
+  "engines": {
+    "node": "^24.0.0",
+    "npm": "^11.3.0"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "dependencies": {
+    "@nextcloud/axios": "^2.5.1",
+    "@nextcloud/e2e-test-server": "^0.4.0",
+    "@nextcloud/initial-state": "^2.2.0",
+    "@nextcloud/l10n": "^3.1.0",
+    "@nextcloud/logger": "^3.0.2",
+    "@nextcloud/paths": "^2.2.1",
+    "@nextcloud/router": "^3.0.1",
+    "cypress-wait-until": "^3.0.2",
+    "vue": "^2.7.15"
+  },
+  "devDependencies": {
+    "@cypress/browserify-preprocessor": "^3.0.2",
+    "@nextcloud/babel-config": "^1.2.0",
+    "@nextcloud/browserslist-config": "^3.0.1",
+    "@nextcloud/cypress": "^1.0.0-beta.8",
+    "@nextcloud/eslint-config": "^8.4.1",
+    "@nextcloud/eslint-plugin": "^2.1.0",
+    "@nextcloud/stylelint-config": "^3.0.1",
+    "@nextcloud/webpack-vue-config": "^6.2.0",
+    "@testing-library/cypress": "^10.1.0",
+    "cypress": "^13.16.0",
+    "cypress-split": "^1.24.31",
+    "cypress-vite": "^1.8.0",
+    "eslint-plugin-cypress": "^3.5.0",
+    "vite-plugin-node-polyfills": "^0.26.0"
+  }
 }
