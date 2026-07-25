@@ -51,7 +51,7 @@
     "cypress": "^13.16.0",
     "cypress-split": "^1.24.31",
     "cypress-vite": "^1.8.0",
-    "eslint-plugin-cypress": "^3.5.0",
+    "eslint-plugin-cypress": "^6.4.3",
     "vite-plugin-node-polyfills": "^0.26.0"
   }
 }
