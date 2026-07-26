@@ -2,12 +2,15 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 build/
 node_modules
-vendor/
+/vendor/
 js/
 
 # Editor directories and files
 .idea/
 
-# Cache files
+# PHP cache files
 .phpunit.result.cache
 .php-cs-fixer.cache
+
+# Cypress test artifacts
+cypress/screenshots/

@@ -3,19 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { randUser } from '../../utils/index.js'
-const user = randUser()
-
 describe('Personal settings', () => {
-	let user1
-
 	beforeEach(() => {
-		cy.createRandomUser()
-			.then(_user => {
-				user1 = _user
-			})
+		cy.createRandomUser().then((user) => {
+			cy.login(user)
+		})
 
-		cy.login(user1)
+		// cy.login(user1)
 	})
 
 	it('Toggle monthly_status_email settings', () => {
