@@ -3,15 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { configureNextcloud, startNextcloud, stopNextcloud, waitOnNextcloud } from '@nextcloud/e2e-test-server/docker'
+import { configureNextcloud, runExec, startNextcloud, stopNextcloud, waitOnNextcloud } from '@nextcloud/e2e-test-server/docker'
 import { defineConfig } from 'cypress'
 import cypressSplit from 'cypress-split'
 import cypressVite from 'cypress-vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
-	projectId: '6m9n96',
-
 	// 16/9 screen ratio
 	viewportWidth: 1280,
 	viewportHeight: 720,
@@ -75,7 +73,19 @@ export default defineConfig({
 			// Setting container's IP as base Url
 			config.baseUrl = `http://${ip}/index.php`
 			await waitOnNextcloud(ip)
-			await configureNextcloud(['monthly_status_email', 'notifications']) // pass empty array as WE are already the viewer
+
+			// Install PHP composer
+			await runExec(
+				['sh', '-c', 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer'],
+				{ user: 'root', verbose: true },
+			)
+
+			// Clone notifications app and install PHP dependencies
+			await runExec(['git', 'clone', '--depth=1', '--branch=master', 'https://github.com/nextcloud/notifications.git', 'apps/notifications'], { verbose: true })
+			await runExec(['sh', '-c', 'cd apps/notifications && composer install --no-dev --no-scripts --no-cache --no-interaction'], { verbose: true })
+
+			// Configure Nextcloud
+			await configureNextcloud(['monthly_status_email', 'notifications'])
 			return config
 		},
 	},
