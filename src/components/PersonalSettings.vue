@@ -12,7 +12,7 @@
 	</NcSettingsSection>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import axios from '@nextcloud/axios'
 import { loadState } from '@nextcloud/initial-state'
 import { t } from '@nextcloud/l10n'

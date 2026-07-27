@@ -12,8 +12,8 @@
     "build": "vite build --mode production",
     "dev": "vite build --mode development",
     "watch": "vite build --watch",
-    "lint": "eslint --ext .js,.vue,.ts,.mjs src cypress --max-warnings=0",
-    "lint:fix": "eslint --ext .js,.vue,.ts,.mjs src cypress --fix",
+    "lint": "vue-tsc --noEmit && eslint --ext .js,.vue,.ts,.mjs src cypress --max-warnings=0",
+    "lint:fix": "vue-tsc --noEmit && eslint --ext .js,.vue,.ts,.mjs src cypress --fix",
     "stylelint": "stylelint 'src/**/*.vue'",
     "stylelint:fix": "stylelint 'src/**/*.vue' --fix",
     "cypress": "npm run cypress:e2e",
@@ -53,6 +53,7 @@
     "eslint": "^10.6.0",
     "eslint-plugin-cypress": "^3.6.0",
     "vite": "^7.3.6",
-    "vite-plugin-node-polyfills": "^0.28.0"
+    "vite-plugin-node-polyfills": "^0.28.0",
+    "vue-tsc": "^3.3.8"
   }
 }
