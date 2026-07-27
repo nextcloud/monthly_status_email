@@ -5,5 +5,7 @@
 
 import { addCommands } from '@nextcloud/e2e-test-server/cypress'
 
+import '@testing-library/cypress/add-commands'
+
 // Add custom commands
 addCommands()

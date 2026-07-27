@@ -14,16 +14,16 @@ describe('Personal settings', () => {
 		cy.visit('/settings/user/notifications')
 		cy.get('#monthly-notifications-settings')
 			.should('contain', 'Monthly Status Email')
-		cy.get('#monthly-notifications-settings input#send-notifications')
+
+		cy.findByRole('checkbox', { name: 'Send status email' })
 			.should('be.checked')
-		cy.get('#monthly-notifications-settings label[for="send-notifications"]')
-			.click()
-		cy.get('#monthly-notifications-settings input#send-notifications')
+			.click({ force: true })
+
+		cy.findByRole('checkbox', { name: 'Send status email' })
 			.should('not.be.checked')
 
 		cy.reload()
-
-		cy.get('#monthly-notifications-settings input#send-notifications')
+		cy.findByRole('checkbox', { name: 'Send status email' })
 			.should('not.be.checked')
 	})
 })

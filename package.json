@@ -12,8 +12,8 @@
     "build": "vite build --mode production",
     "dev": "vite build --mode development",
     "watch": "vite build --watch",
-    "lint": "eslint --ext .js,.vue,.ts,.mjs src cypress --max-warnings=0",
-    "lint:fix": "eslint --ext .js,.vue,.ts,.mjs src cypress --fix",
+    "lint": "vue-tsc --noEmit && eslint --ext .js,.vue,.ts,.mjs src cypress --max-warnings=0",
+    "lint:fix": "vue-tsc --noEmit && eslint --ext .js,.vue,.ts,.mjs src cypress --fix",
     "stylelint": "stylelint 'src/**/*.vue'",
     "stylelint:fix": "stylelint 'src/**/*.vue' --fix",
     "cypress": "npm run cypress:e2e",
@@ -33,25 +33,27 @@
     "@nextcloud/initial-state": "^3.0.0",
     "@nextcloud/l10n": "^3.4.1",
     "@nextcloud/logger": "^3.0.3",
-    "@nextcloud/paths": "^2.2.1",
+    "@nextcloud/paths": "^3.1.0",
     "@nextcloud/router": "^3.0.1",
+    "@nextcloud/vue": "^9.9.0",
     "cypress-wait-until": "^3.0.2",
-    "vue": "^2.7.15"
+    "vue": "^3.5.40"
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.0.1",
     "@nextcloud/eslint-config": "^9.0.1",
     "@nextcloud/eslint-plugin": "^2.2.1",
     "@nextcloud/stylelint-config": "^3.2.2",
-    "@nextcloud/vite-config": "^1.7.2",
+    "@nextcloud/vite-config": "^2.5.4",
     "@testing-library/cypress": "^10.1.0",
-    "@vue/tsconfig": "^0.5.1",
+    "@vue/tsconfig": "^0.9.1",
     "cypress": "^15.19.0",
     "cypress-split": "^1.24.31",
     "cypress-vite": "^1.8.0",
     "eslint": "^10.6.0",
-    "eslint-plugin-cypress": "^3.6.0",
+    "eslint-plugin-cypress": "^6.4.3",
     "vite": "^7.3.6",
-    "vite-plugin-node-polyfills": "^0.28.0"
+    "vite-plugin-node-polyfills": "^0.28.0",
+    "vue-tsc": "^3.3.8"
   }
 }
