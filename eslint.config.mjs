@@ -4,14 +4,14 @@
  */
 
 import { recommendedVue2Javascript } from '@nextcloud/eslint-config'
+import CypressEslint from 'eslint-plugin-cypress/flat'
 import { defineConfig } from 'eslint/config'
-import CypressEslint from 'eslint-plugin-cypress'
 
 export default defineConfig([
 	...recommendedVue2Javascript,
 
 	{
+		files: ['cypress/**'],
 		...CypressEslint.configs.recommended,
-		files: ['cypress/**', '**/*.cy.*'],
 	},
 ])
