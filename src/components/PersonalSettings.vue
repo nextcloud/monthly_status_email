@@ -9,7 +9,8 @@
 			{{ t('monthly_status_email', 'Receive monthly status mails with a summary of usaged storage and usage hints') }}
 		</p>
 		<p>
-			<input id="send-notifications"
+			<input
+				id="send-notifications"
 				v-model="sendNotifications"
 				type="checkbox"
 				class="checkbox">
@@ -19,9 +20,9 @@
 </template>
 
 <script>
-import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import { loadState } from '@nextcloud/initial-state'
+import { generateUrl } from '@nextcloud/router'
 
 export default {
 	name: 'PersonalSettings',
@@ -30,11 +31,13 @@ export default {
 			sendNotifications: !loadState('monthly_status_email', 'opted-out', false),
 		}
 	},
+
 	watch: {
 		sendNotifications() {
 			this.saveSetting()
 		},
 	},
+
 	methods: {
 		async saveSetting() {
 			const data = {
