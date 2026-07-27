@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import Vue from 'vue'
+import { createApp } from 'vue'
 import PersonalSettings from './components/PersonalSettings.vue'
 
-Vue.prototype.t = t
-Vue.prototype.n = n
-Vue.prototype.OC = OC
-Vue.prototype.OCA = OCA
-
-const View = Vue.extend(PersonalSettings)
-const setting = new View()
-setting.$mount('#monthly-notifications-settings')
+createApp(PersonalSettings).mount('#monthly-notifications-settings')

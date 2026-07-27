@@ -22,10 +22,16 @@
 <script>
 import axios from '@nextcloud/axios'
 import { loadState } from '@nextcloud/initial-state'
+import { t } from '@nextcloud/l10n'
 import { generateUrl } from '@nextcloud/router'
 
 export default {
 	name: 'PersonalSettings',
+
+	setup() {
+		return { t }
+	},
+
 	data() {
 		return {
 			sendNotifications: !loadState('monthly_status_email', 'opted-out', false),
