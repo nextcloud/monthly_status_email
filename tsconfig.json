@@ -4,8 +4,8 @@
  */
 
 {
-	"extends": "@vue/tsconfig",
-	"include": ["src/**/*", "vite.config.ts"],
+	"extends": "@vue/tsconfig/tsconfig.json",
+	"include": ["src/**/*.ts", "src/**/*.vue", "*.ts", "playwright/**/*.ts"],
 	"compilerOptions": {
 		"allowJs": true,
 		"target": "ESNext",
