@@ -4,7 +4,7 @@
  */
 
 import { recommended } from '@nextcloud/eslint-config'
-import CypressEslint from 'eslint-plugin-cypress/flat'
+import CypressEslint from 'eslint-plugin-cypress'
 import { defineConfig } from 'eslint/config'
 
 export default defineConfig([
