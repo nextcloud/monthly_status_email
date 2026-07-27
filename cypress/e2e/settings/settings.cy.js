@@ -8,8 +8,6 @@ describe('Personal settings', () => {
 		cy.createRandomUser().then((user) => {
 			cy.login(user)
 		})
-
-		// cy.login(user1)
 	})
 
 	it('Toggle monthly_status_email settings', () => {
