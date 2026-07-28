@@ -4,6 +4,12 @@
 -->
 # Changelog
 
+## [2.0.0] - 2026-07-28
+
+- Support Nextcloud 28-34
+- Update PHP + NPM dependencies
+- Migrate frontend to Vue 3
+
 ## [1.4.0] - 2024-08-01
 
 - Add support for Nextcloud 30

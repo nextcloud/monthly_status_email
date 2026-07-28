@@ -9,7 +9,7 @@
 	<name>Monthly Status Mails</name>
 	<summary>Send monthly status mails to users</summary>
 	<description>Monthly notifications, e.g. summary of used storage and usage hints.</description>
-	<version>1.4.0</version>
+	<version>2.0.0</version>
 	<licence>agpl</licence>
 	<author>Carl Schwan</author>
 	<author>Jonas Meurer</author>
