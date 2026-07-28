@@ -24,6 +24,7 @@ class Version23000Date2022022912000001 extends SimpleMigrationStep {
 	) {
 	}
 
+	#[\Override]
 	public function preSchemaChange(IOutput $output, Closure $schemaClosure, array $options) {
 		$query = $this->connection->getQueryBuilder();
 
@@ -57,6 +58,7 @@ class Version23000Date2022022912000001 extends SimpleMigrationStep {
 	 * @param array $options
 	 * @return null|ISchemaWrapper
 	 */
+	#[\Override]
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options) {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();

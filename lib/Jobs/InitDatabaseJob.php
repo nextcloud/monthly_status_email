@@ -35,6 +35,7 @@ class InitDatabaseJob extends QueuedJob {
 		$this->userManager = $userManager;
 	}
 
+	#[\Override]
 	protected function run($argument) {
 		$this->userManager->callForSeenUsers(function (IUser $user): void {
 			try {

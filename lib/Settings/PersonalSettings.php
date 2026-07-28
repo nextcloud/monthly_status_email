@@ -49,6 +49,7 @@ class PersonalSettings implements ISettings {
 	/**
 	 * @return TemplateResponse
 	 */
+	#[\Override]
 	public function getForm(): TemplateResponse {
 		if (null !== $user = $this->userSession->getUser()) {
 			$this->initialState->provideInitialState(
@@ -61,6 +62,7 @@ class PersonalSettings implements ISettings {
 	/**
 	 * @return string
 	 */
+	#[\Override]
 	public function getSection(): string {
 		if (version_compare($this->ncVersion, '23.0.0', '<')) {
 			return 'activity';
@@ -71,6 +73,7 @@ class PersonalSettings implements ISettings {
 	/**
 	 * @return int
 	 */
+	#[\Override]
 	public function getPriority(): int {
 		return 50;
 	}

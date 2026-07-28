@@ -48,6 +48,7 @@ class FirstLoginListener implements IEventListener {
 	 * users.
 	 * @throws NotFoundException
 	 */
+	#[\Override]
 	public function handle(Event $event): void {
 		if (!$event instanceof UserFirstTimeLoggedInEvent) {
 			return;

@@ -18,25 +18,16 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SendMail extends Base {
-	/** @var IUserManager $userManager */
-	private $userManager;
-	/** @var NotificationTrackerService */
-	private $service;
-	/** @var MailSender */
-	private $mailSender;
-
 	public function __construct(
-		NotificationTrackerService $service,
-		IUserManager $userManager,
-		MailSender $mailSender,
+		private readonly NotificationTrackerService $service,
+		private readonly IUserManager $userManager,
+		private readonly MailSender $mailSender,
 	) {
 		parent::__construct();
-		$this->userManager = $userManager;
-		$this->service = $service;
-		$this->mailSender = $mailSender;
 	}
 
-	protected function configure() {
+	#[\Override]
+	protected function configure(): void {
 		$this
 			->setName('monthly_status_email:send')
 			->setDescription('Send the notification mail to a specific user')
@@ -44,7 +35,8 @@ class SendMail extends Base {
 		parent::configure();
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	#[\Override]
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$userId = $input->getArgument('user_id');
 		$trackedNotification = $this->service->find($userId);
 		$user = $this->userManager->get($trackedNotification->getUserId());

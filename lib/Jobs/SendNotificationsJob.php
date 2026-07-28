@@ -58,6 +58,7 @@ class SendNotificationsJob extends TimedJob {
 	/**
 	 * @inheritDoc
 	 */
+	#[\Override]
 	protected function run($argument): void {
 		$limit = (int)$this->config->getAppValue($this->appName, 'status-email-max-mail-sent', '1000');
 
