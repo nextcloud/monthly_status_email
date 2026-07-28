@@ -4,13 +4,13 @@
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 <psalm
-	errorLevel="5"
+	errorLevel="3"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="https://getpsalm.org/schema/config"
 	xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 	errorBaseline="tests/psalm-baseline.xml"
-	phpVersion="8.0"
->
+	phpVersion="8.2"
+	findUnusedCode="false">
 	<stubs>
 		<file name="tests/stub.phpstub" preloadClasses="true"/>
 	</stubs>

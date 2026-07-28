@@ -13,6 +13,10 @@ use OCA\MonthlyStatusEmail\Service\MailSender;
 use OCA\MonthlyStatusEmail\Service\NotFoundException;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
+use OCP\AppFramework\Http\Attribute\UserRateLimit;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
@@ -24,46 +28,25 @@ use OCP\IUserSession;
  * Controller responsible for opting out of the notifications.
  */
 class OptoutController extends Controller {
-	/**
-	 * @var NotificationTrackerService
-	 */
-	private $service;
-	/**
-	 * @var IUserSession
-	 */
-	private $session;
-	/**
-	 * @var MailSender
-	 */
-	private $mailSender;
-
-	/**
-	 * ApiController constructor.
-	 *
-	 * @param string $appName
-	 * @param IRequest $request
-	 */
 	public function __construct(
-		$appName,
+		string $appName,
 		IRequest $request,
-		IUserSession $session,
-		NotificationTrackerService $service,
-		MailSender $mailSender,
+		private readonly IUserSession $session,
+		private readonly NotificationTrackerService $service,
+		private readonly MailSender $mailSender,
 	) {
 		parent::__construct($appName, $request);
-		$this->service = $service;
-		$this->session = $session;
-		$this->appName = $appName;
-		$this->mailSender = $mailSender;
 	}
 
-	/**
-	 * @NoAdminRequired
-	 */
+	#[NoAdminRequired]
 	public function update(bool $optedOut): DataResponse {
 		try {
 			$user = $this->session->getUser();
-			$trackedNotification = $this->service->updateOptedOut($this->session->getUser()->getUID(), $optedOut);
+			if ($user === null) {
+				throw new \RuntimeException('User not logged in');
+			}
+
+			$trackedNotification = $this->service->updateOptedOut($user->getUID(), $optedOut);
 			if (!$optedOut) {
 				// Use just activated the monthly email again
 				$this->mailSender->sendStatusEmailActivation($user, $trackedNotification);
@@ -74,11 +57,9 @@ class OptoutController extends Controller {
 		}
 	}
 
-	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 * @UserRateThrottle
-	 */
+	#[NoCSRFRequired]
+	#[PublicPage]
+	#[UserRateLimit(limit: 10, period: 120)]
 	public function displayOptingOutPage(string $token): PublicTemplateResponse {
 		// This page is required since link in emails get often visited with
 		// GET requests by email clients. JS will take care of sending POST
@@ -88,12 +69,9 @@ class OptoutController extends Controller {
 		]);
 	}
 
-	/**
-	 * @PublicPage
-	 * @UserRateThrottle
-	 * @return DataResponse|NotFoundResponse
-	 */
-	public function updateOptingOut(string $token): Response {
+	#[PublicPage]
+	#[UserRateLimit(limit: 10, period: 120)]
+	public function updateOptingOut(string $token): DataResponse|NotFoundResponse {
 		try {
 			$this->service->uptadeOptedOutByToken($token, true);
 			return new DataResponse([

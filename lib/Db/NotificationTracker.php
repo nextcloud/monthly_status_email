@@ -63,6 +63,7 @@ class NotificationTracker extends Entity implements \JsonSerializable {
 	}
 
 	/** {@inheritDoc} */
+	#[\Override]
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,

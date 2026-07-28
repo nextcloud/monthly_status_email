@@ -30,41 +30,18 @@ class MessageProvider {
 	public const NO_FILE_UPLOAD = 9;
 	public const NO_EMAIL_UPLOAD = 10;
 
-	/**
-	 * @var string
-	 */
-	private $productName;
-	/**
-	 * @var IURLGenerator
-	 */
-	private $generator;
-	/**
-	 * @var IConfig
-	 */
-	private $config;
-	/**
-	 * @var string
-	 */
-	private $entity;
-	/**
-	 * @var IUser
-	 */
-	private $user;
-	/**
-	 * @var IL10N
-	 */
-	private $l10n;
-	/**
-	 * @var IFactory
-	 */
-	private $l10nFactory;
+	private readonly string $productName;
+	private readonly string $entity;
+	private ?IUser $user = null;
+	private ?IL10N $l10n = null;
 
-	public function __construct(IConfig $config, IURLGenerator $generator, IFactory $l10nFactory) {
+	public function __construct(
+		private readonly IConfig $config,
+		private readonly IURLGenerator $generator,
+		private readonly IFactory $l10nFactory,
+	) {
 		$this->productName = $config->getAppValue('theming', 'productName', 'Nextcloud');
 		$this->entity = $config->getAppValue('theming', 'name', 'Nextcloud');
-		$this->generator = $generator;
-		$this->config = $config;
-		$this->l10nFactory = $l10nFactory;
 	}
 
 	/**
@@ -81,24 +58,24 @@ class MessageProvider {
 		if ($bytes < 1024) {
 			return [$bytes, 'B'];
 		}
-		$bytes = round($bytes / 1024, 0);
+		$bytes = (int)round($bytes / 1024, 0);
 		if ($bytes < 1024) {
 			return [$bytes, 'KB'];
 		}
-		$bytes = round($bytes / 1024, 1);
+		$bytes = (int)round($bytes / 1024, 1);
 		if ($bytes < 1024) {
 			return [$bytes, 'MB'];
 		}
-		$bytes = round($bytes / 1024, 1);
+		$bytes = (int)round($bytes / 1024, 1);
 		if ($bytes < 1024) {
 			return [$bytes, 'GB'];
 		}
-		$bytes = round($bytes / 1024, 1);
+		$bytes = (int)round($bytes / 1024, 1);
 		if ($bytes < 1024) {
 			return [$bytes, 'TB'];
 		}
 
-		$bytes = round($bytes / 1024, 1);
+		$bytes = (int)round($bytes / 1024, 1);
 		return [$bytes, 'PB'];
 	}
 
@@ -386,7 +363,7 @@ EOF,
 		}
 	}
 
-	public function setUser(IUser $user) {
+	public function setUser(IUser $user): void {
 		$this->user = $user;
 		$this->l10n = $this->l10nFactory->get(
 			'monthly_status_email',

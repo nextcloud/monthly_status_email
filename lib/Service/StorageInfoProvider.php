@@ -33,8 +33,11 @@ class StorageInfoProvider {
 		}
 		$quota = \OCP\Files\FileInfo::SPACE_UNLIMITED;
 		$mount = $userFolder->getMountPoint();
-		$storage = $mount->getStorage();
-		$sourceStorage = $storage;
+		$sourceStorage = $mount->getStorage();
+		if ($sourceStorage === null	) {
+			throw new \RuntimeException('MountPoint for storage not found');
+		}
+
 		$internalPath = $userFolder->getInternalPath();
 		if ($sourceStorage->instanceOfStorage(Quota::class)) {
 			/** @var Quota $sourceStorage */
@@ -42,17 +45,17 @@ class StorageInfoProvider {
 		}
 
 		$free = $sourceStorage->free_space($internalPath);
-		if ($free >= 0) {
-			$total = $free + $used;
+		if (is_numeric($free) && $free >= 0) {
+			$total = (int)$free + (int)$used;
 		} else {
 			$total = $free; //either unknown or unlimited
 		}
-		if ($total > 0) {
+		if (is_numeric($total) && $total > 0) {
 			if ($quota > 0 && $total > $quota) {
 				$total = $quota;
 			}
 			// prevent division by zero or error codes (negative values)
-			$relative = round(($used / $total) * 10000) / 100;
+			$relative = round(((float)$used / (float)$total) * 10000.0) / 100.0;
 		} else {
 			$relative = 0;
 		}
@@ -60,7 +63,7 @@ class StorageInfoProvider {
 		$info = [
 			'free' => $free,
 			'used' => $used,
-			'quota' => (int)$quota,
+			'quota' => $quota,
 			'total' => $total,
 			'relative' => $relative,
 		];
