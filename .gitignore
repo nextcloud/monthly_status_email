@@ -13,5 +13,6 @@ js/
 .phpunit.result.cache
 .php-cs-fixer.cache
 
-# Cypress test artifacts
-cypress/screenshots/
+# Playwright test artifacts
+/playwright-report/
+/test-results/

@@ -4,14 +4,17 @@
  */
 
 import { recommended } from '@nextcloud/eslint-config'
-import CypressEslint from 'eslint-plugin-cypress'
 import { defineConfig } from 'eslint/config'
+import globals from 'globals'
 
 export default defineConfig([
 	...recommended,
-
 	{
-		files: ['cypress/**'],
-		...CypressEslint.configs.recommended,
+		files: ['playwright/**/*.js', 'playwright/**/*.ts'],
+		languageOptions: {
+			globals: {
+				...globals.node,
+			},
+		},
 	},
 ])

@@ -1,28 +1,48 @@
 # SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
 # SPDX-License-Identifier: AGPL-3.0-or-later
+
 version: 2
 updates:
   - package-ecosystem: composer
     directory: "/"
     schedule:
       interval: weekly
-      day: saturday
+      day: sunday
       time: "03:00"
       timezone: Europe/Paris
+    cooldown:
+      default-days: 4
     open-pull-requests-limit: 10
     labels:
       - 3. to review
       - dependencies
+
   - package-ecosystem: npm
     directory: "/"
     schedule:
       interval: weekly
-      day: saturday
+      day: sunday
       time: "03:00"
       timezone: Europe/Paris
+    cooldown:
+      default-days: 4
     open-pull-requests-limit: 10
     # Disable automatic rebasing because without a build CI will likely fail anyway
     rebase-strategy: "disabled"
+    labels:
+      - 3. to review
+      - dependencies
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: sunday
+      time: "03:00"
+      timezone: Europe/Paris
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
     labels:
       - 3. to review
       - dependencies
