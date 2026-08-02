@@ -21,7 +21,7 @@ class StorageInfoProvider {
 		\OC_Util::setupFS($user->getUID());
 
 		/** @var IRootFolder $rootFolder */
-		$rootFolder = \OC::$server->get(IRootFolder::class);
+		$rootFolder = \OCP\Server::get(IRootFolder::class);
 		$userFolder = $rootFolder->getUserFolder($user->getUID());
 
 		if (!($userFolder instanceof \OCP\Files\FileInfo)) {

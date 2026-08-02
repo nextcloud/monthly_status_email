@@ -15,22 +15,21 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 
 class NotificationTrackerService {
-	private $mapper;
-
 	/**
 	 * NotificationTrackerService constructor.
 	 *
 	 * @param NotificationTrackerMapper $mapper
 	 */
-	public function __construct(NotificationTrackerMapper $mapper) {
-		$this->mapper = $mapper;
+	public function __construct(
+		private readonly NotificationTrackerMapper $mapper,
+	) {
 	}
 
 	/**
 	 * @throws NotFoundException
 	 * @return never
 	 */
-	private function handleException(\Exception $e) {
+	private function handleException(\Throwable $e) {
 		if ($e instanceof DoesNotExistException
 			|| $e instanceof MultipleObjectsReturnedException) {
 			throw new NotFoundException($e->getMessage());
@@ -47,7 +46,7 @@ class NotificationTrackerService {
 	public function find(string $userId): NotificationTracker {
 		try {
 			return $this->mapper->find($userId);
-		} catch (\Exception $e) {
+		} catch (\Exception) {
 			return $this->create($userId, false, time());
 		}
 	}
@@ -88,7 +87,7 @@ class NotificationTrackerService {
 			$notificationTracker->setOptedOut($optedOut);
 			$this->mapper->update($notificationTracker);
 			return $notificationTracker;
-		} catch (\Exception $e) {
+		} catch (\Exception) {
 			try {
 				return $this->create($userId, $optedOut, time());
 			} catch (\Exception $exception) {

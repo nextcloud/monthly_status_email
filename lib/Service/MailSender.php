@@ -30,23 +30,24 @@ use Psr\Log\LoggerInterface;
  * @package OCA\MonthlyStatusEmail\Service
  */
 class MailSender {
-	private string $entity;
+	private readonly string $entity;
 	private MessageProvider $provider;
 
 	public function __construct(
-		private NotificationTrackerService $service,
-		private IUserManager $userManager,
-		private IConfig $config,
-		private IMailer $mailer,
-		private IL10N $l,
-		private IManager $shareManager,
-		private ClientDetector $clientDetector,
-		private LoggerInterface $logger,
-		private NoFileUploadedDetector $noFileUploadedDetector,
-		private StorageInfoProvider $storageInfoProvider,
+		private readonly NotificationTrackerService $service,
+		private readonly IUserManager $userManager,
+		private readonly IConfig $config,
+		private readonly IMailer $mailer,
+		private readonly IL10N $l,
+		private readonly IManager $shareManager,
+		private readonly ClientDetector $clientDetector,
+		private readonly LoggerInterface $logger,
+		private readonly NoFileUploadedDetector $noFileUploadedDetector,
+		private readonly StorageInfoProvider $storageInfoProvider,
 		ContainerInterface $container,
+		private readonly \OCP\IAppConfig $appConfig,
 	) {
-		$this->entity = strip_tags($this->config->getAppValue('theming', 'name', 'Nextcloud'));
+		$this->entity = strip_tags($this->appConfig->getValueString('theming', 'name', 'Nextcloud'));
 		$className = $config->getSystemValueString('status-email-message-provider', MessageProvider::class);
 		if (class_exists($className)) {
 			$this->provider = $container->get($className);
