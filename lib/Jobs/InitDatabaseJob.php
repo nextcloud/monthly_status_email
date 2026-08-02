@@ -17,21 +17,16 @@ use OCP\IUserManager;
 
 class InitDatabaseJob extends QueuedJob {
 	/**
-	 * @var NotificationTrackerService
-	 */
-	private $service;
-	/**
 	 * @var IUserManager
 	 */
 	private $userManager;
 
 	public function __construct(
-		NotificationTrackerService $service,
+		private readonly NotificationTrackerService $service,
 		IUserManager $userManager,
 		ITimeFactory $timeFactory,
 	) {
 		parent::__construct($timeFactory);
-		$this->service = $service;
 		$this->userManager = $userManager;
 	}
 
@@ -39,11 +34,11 @@ class InitDatabaseJob extends QueuedJob {
 		$this->userManager->callForSeenUsers(function (IUser $user): void {
 			try {
 				// Spreads out reminders so that not every mails is sent at once.
-				$randomNumberOfDays = new \DateInterval('P' . rand(0, 30) . 'D');
+				$randomNumberOfDays = new \DateInterval('P' . random_int(0, 30) . 'D');
 				$randomDateInLast30days = new \DateTime('now');
 				$randomDateInLast30days->sub($randomNumberOfDays);
 				$this->service->create($user->getUID(), false, $randomDateInLast30days->getTimestamp());
-			} catch (\Exception $e) {
+			} catch (\Exception) {
 				// Already existing entry => ignore
 			}
 		});

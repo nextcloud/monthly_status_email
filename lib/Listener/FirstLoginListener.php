@@ -24,12 +24,12 @@ use Psr\Container\ContainerInterface;
  */
 class FirstLoginListener implements IEventListener {
 	private MessageProvider $provider;
-	private string $entity;
-	private bool $enabled;
+	private readonly string $entity;
+	private readonly bool $enabled;
 
 	public function __construct(
-		private IMailer $mailer,
-		private NotificationTrackerService $service,
+		private readonly IMailer $mailer,
+		private readonly NotificationTrackerService $service,
 		IConfig $config,
 		ContainerInterface $container,
 	) {

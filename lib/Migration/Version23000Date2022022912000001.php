@@ -19,8 +19,8 @@ use Psr\Log\LoggerInterface;
 
 class Version23000Date2022022912000001 extends SimpleMigrationStep {
 	public function __construct(
-		private IDBConnection $connection,
-		private LoggerInterface $logger,
+		private readonly IDBConnection $connection,
+		private readonly LoggerInterface $logger,
 	) {
 	}
 

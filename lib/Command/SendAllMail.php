@@ -19,20 +19,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SendAllMail extends Base {
 	/** @var IUserManager $userManager */
 	private $userManager;
-	/** @var NotificationTrackerService */
-	private $service;
-	/** @var MailSender */
-	private $mailSender;
 
 	public function __construct(
-		NotificationTrackerService $service,
+		private readonly NotificationTrackerService $service,
 		IUserManager $userManager,
-		MailSender $mailSender,
+		private readonly MailSender $mailSender,
 	) {
 		parent::__construct();
 		$this->userManager = $userManager;
-		$this->service = $service;
-		$this->mailSender = $mailSender;
 	}
 
 	protected function configure() {
@@ -47,7 +41,7 @@ class SendAllMail extends Base {
 		foreach ($trackedNotifications as $trackedNotification) {
 			try {
 				$ret = $this->mailSender->sendMonthlyMailTo($trackedNotification);
-			} catch (\Exception $e) {
+			} catch (\Exception) {
 				$output->writeln('Failure sending email to ' . $trackedNotification->getUserId());
 			}
 			if ($ret) {

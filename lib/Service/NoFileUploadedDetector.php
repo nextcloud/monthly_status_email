@@ -16,7 +16,7 @@ class NoFileUploadedDetector {
 	public function hasNotUploadedFiles(IUser $user): bool {
 		try {
 			$view = new View('/' . $user->getUID() . '/files/');
-		} catch (\Exception $e) {
+		} catch (\Exception) {
 			return false;
 		}
 		$directoryContents = $view->getDirectoryContent('');

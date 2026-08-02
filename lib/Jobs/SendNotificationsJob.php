@@ -18,41 +18,21 @@ use Psr\Log\LoggerInterface;
 
 class SendNotificationsJob extends TimedJob {
 	/**
-	 * @var MailSender
-	 */
-	private $mailSender;
-	/**
 	 * @var IConfig
 	 */
 	private $config;
-	/**
-	 * @var string
-	 */
-	private $appName;
-	/**
-	 * @var NotificationTrackerService
-	 */
-	private $service;
-	/**
-	 * @var LoggerInterface
-	 */
-	private $logger;
 
 	public function __construct(
-		string $appName,
+		private readonly string $appName,
 		ITimeFactory $time,
-		MailSender $mailSender,
+		private readonly MailSender $mailSender,
 		IConfig $config,
-		NotificationTrackerService $service,
-		LoggerInterface $logger,
+		private readonly NotificationTrackerService $service,
+		private readonly LoggerInterface $logger,
 	) {
 		parent::__construct($time);
-		$this->setInterval(0); // 60 * 60); // every hour
-		$this->mailSender = $mailSender;
+		$this->setInterval(0);
 		$this->config = $config;
-		$this->appName = $appName;
-		$this->service = $service;
-		$this->logger = $logger;
 	}
 
 	/**

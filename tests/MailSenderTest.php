@@ -16,6 +16,7 @@ use OCA\MonthlyStatusEmail\Service\MessageProvider;
 use OCA\MonthlyStatusEmail\Service\NoFileUploadedDetector;
 use OCA\MonthlyStatusEmail\Service\NotificationTrackerService;
 use OCA\MonthlyStatusEmail\Service\StorageInfoProvider;
+use OCP\IAppConfig;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IUser;
@@ -104,6 +105,7 @@ class MailSenderTest extends TestCase {
 		$this->clientDetector = $this->createMock(ClientDetector::class);
 		$this->noFileUploadedDetector = $this->createMock(NoFileUploadedDetector::class);
 		$this->storageInfoProvider = $this->createMock(StorageInfoProvider::class);
+		$appConfig = $this->createMock(IAppConfig::class);
 
 		$this->mailSender = new MailSender(
 			$this->service,
@@ -116,7 +118,8 @@ class MailSenderTest extends TestCase {
 			$this->createMock(LoggerInterface::class),
 			$this->noFileUploadedDetector,
 			$this->storageInfoProvider,
-			$this->container
+			$this->container,
+			$appConfig
 		);
 
 		$this->message = $this->createMock(IMessage::class);
@@ -275,7 +278,7 @@ class MailSenderTest extends TestCase {
 		$this->service
 			->expects($this->once())
 			->method('update')
-			->willReturnCallback(function ($trackedNotification) use ($timestamp) {
+			->willReturnCallback(function ($trackedNotification) use ($timestamp): void {
 				self::assertGreaterThan($timestamp, $trackedNotification->getLastSendNotification());
 			});
 

@@ -27,10 +27,6 @@ class InitDatabase implements IRepairStep {
 
 	/** @var IConfig */
 	private $config;
-	/**
-	 * @var NotificationTrackerService
-	 */
-	private $service;
 
 	/**
 	 * @param IJobList $jobList
@@ -39,11 +35,10 @@ class InitDatabase implements IRepairStep {
 	public function __construct(
 		IJobList $jobList,
 		IConfig $config,
-		NotificationTrackerService $service,
+		private readonly NotificationTrackerService $service,
 	) {
 		$this->jobList = $jobList;
 		$this->config = $config;
-		$this->service = $service;
 	}
 
 	/**

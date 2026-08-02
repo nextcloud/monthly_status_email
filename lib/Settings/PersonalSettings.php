@@ -22,10 +22,6 @@ class PersonalSettings implements ISettings {
 	 */
 	private $initialState;
 	/**
-	 * @var NotificationTrackerService
-	 */
-	private $service;
-	/**
 	 * @var IUserSession
 	 */
 	private $userSession;
@@ -36,12 +32,11 @@ class PersonalSettings implements ISettings {
 
 	public function __construct(
 		IInitialState $initialState,
-		NotificationTrackerService $service,
+		private readonly NotificationTrackerService $service,
 		IUserSession $userSession,
 		IConfig $config,
 	) {
 		$this->initialState = $initialState;
-		$this->service = $service;
 		$this->userSession = $userSession;
 		$this->ncVersion = $config->getSystemValueString('version', '0.0.0');
 	}

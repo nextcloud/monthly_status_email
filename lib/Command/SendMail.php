@@ -20,20 +20,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SendMail extends Base {
 	/** @var IUserManager $userManager */
 	private $userManager;
-	/** @var NotificationTrackerService */
-	private $service;
-	/** @var MailSender */
-	private $mailSender;
 
 	public function __construct(
-		NotificationTrackerService $service,
+		private readonly NotificationTrackerService $service,
 		IUserManager $userManager,
-		MailSender $mailSender,
+		private readonly MailSender $mailSender,
 	) {
 		parent::__construct();
 		$this->userManager = $userManager;
-		$this->service = $service;
-		$this->mailSender = $mailSender;
 	}
 
 	protected function configure() {

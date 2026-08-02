@@ -25,17 +25,9 @@ use OCP\IUserSession;
  */
 class OptoutController extends Controller {
 	/**
-	 * @var NotificationTrackerService
-	 */
-	private $service;
-	/**
 	 * @var IUserSession
 	 */
 	private $session;
-	/**
-	 * @var MailSender
-	 */
-	private $mailSender;
 
 	/**
 	 * ApiController constructor.
@@ -47,14 +39,12 @@ class OptoutController extends Controller {
 		$appName,
 		IRequest $request,
 		IUserSession $session,
-		NotificationTrackerService $service,
-		MailSender $mailSender,
+		private readonly NotificationTrackerService $service,
+		private readonly MailSender $mailSender,
 	) {
 		parent::__construct($appName, $request);
-		$this->service = $service;
 		$this->session = $session;
 		$this->appName = $appName;
-		$this->mailSender = $mailSender;
 	}
 
 	/**
@@ -69,7 +59,7 @@ class OptoutController extends Controller {
 				$this->mailSender->sendStatusEmailActivation($user, $trackedNotification);
 			}
 			return new DataResponse(['done' => true]);
-		} catch (NotFoundException $exception) {
+		} catch (NotFoundException) {
 			return new DataResponse(['done' => false, 'exception' => 'not-found']);
 		}
 	}
@@ -99,7 +89,7 @@ class OptoutController extends Controller {
 			return new DataResponse([
 				'done' => true
 			]);
-		} catch (NotFoundException $exception) {
+		} catch (NotFoundException) {
 			return new NotFoundResponse();
 		}
 	}
