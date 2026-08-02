@@ -4,6 +4,7 @@ build/
 css/
 node_modules
 /vendor/
+/vendor-bin/*/vendor
 js/
 
 # Editor directories and files
