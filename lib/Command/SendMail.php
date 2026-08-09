@@ -38,7 +38,7 @@ class SendMail extends Base {
 		parent::configure();
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$userId = $input->getArgument('user_id');
 		$trackedNotification = $this->service->find($userId);
 		$user = $this->userManager->get($trackedNotification->getUserId());

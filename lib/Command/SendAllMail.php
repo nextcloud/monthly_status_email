@@ -36,7 +36,7 @@ class SendAllMail extends Base {
 		parent::configure();
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$trackedNotifications = $this->service->findAll();
 		foreach ($trackedNotifications as $trackedNotification) {
 			try {
