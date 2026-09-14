@@ -27,17 +27,17 @@
   ],
   "dependencies": {
     "@nextcloud/axios": "^2.5.1",
-    "@nextcloud/e2e-test-server": "^0.6.0",
     "@nextcloud/initial-state": "^3.0.0",
     "@nextcloud/l10n": "^3.4.1",
     "@nextcloud/logger": "^3.0.3",
     "@nextcloud/paths": "^3.1.0",
     "@nextcloud/router": "^3.0.1",
-    "@nextcloud/vue": "^9.9.0",
+    "@nextcloud/vue": "^9.12.0",
     "vue": "^3.5.42"
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.0.1",
+    "@nextcloud/e2e-test-server": "^0.6.0",
     "@nextcloud/eslint-config": "^9.0.1",
     "@nextcloud/eslint-plugin": "^2.2.1",
     "@nextcloud/stylelint-config": "^3.2.2",
@@ -48,5 +48,14 @@
     "vite": "^7.3.6",
     "vite-plugin-node-polyfills": "^0.28.0",
     "vue-tsc": "^3.3.11"
+  },
+  "allowScripts": {
+    "core-js@3.49.0": true,
+    "cpu-features@0.0.10": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.1": true,
+    "ssh2@1.17.0": true,
+    "protobufjs@7.6.5": true,
+    "@parcel/watcher@2.6.0": true
   }
 }

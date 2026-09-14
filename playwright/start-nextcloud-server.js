@@ -5,13 +5,24 @@
 
 import {
 	configureNextcloud,
-	runExec,
 	startNextcloud,
 	stopNextcloud,
 	waitOnNextcloud,
 } from '@nextcloud/e2e-test-server/docker'
 
 const serverBranch = process.env.PLAYWRIGHT_NC_SERVER_BRANCH ?? 'master'
+
+/**
+ *
+ */
+async function isServerRunning() {
+	try {
+		const res = await fetch('https://127.0.0.1:8089/status.php')
+		return res.ok
+	} catch {
+		return false
+	}
+}
 
 /**
  * Starts the Nextcloud server.
@@ -35,21 +46,16 @@ process.on('SIGTERM', stop)
 process.on('SIGINT', stop)
 
 // Start the Nextcloud docker container
-const ip = await start()
-await waitOnNextcloud(ip)
+if (await isServerRunning()) {
+	// eslint-disable-next-line no-console
+	console.log('└─ Nextcloud is now ready to use')
+} else {
+	const ip = await start()
+	await waitOnNextcloud(ip)
 
-// Install PHP composer
-await runExec(
-	['sh', '-c', 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer'],
-	{ user: 'root', verbose: true },
-)
-
-// Clone notifications app and install PHP dependencies
-await runExec(['git', 'clone', '--depth=1', `--branch=${serverBranch}`, 'https://github.com/nextcloud/notifications.git', 'apps/notifications'], { verbose: true })
-await runExec(['sh', '-c', 'cd apps/notifications && composer install --no-dev --no-scripts --no-cache --no-interaction'], { verbose: true })
-
-// Configure Nextcloud
-await configureNextcloud(['monthly_status_email', 'notifications'])
+	// Configure Nextcloud
+	await configureNextcloud(['monthly_status_email', 'notifications'])
+}
 
 // Idle to wait for shutdown
 while (true) {

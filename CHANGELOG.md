@@ -4,6 +4,11 @@
 -->
 # Changelog
 
+## [2.1.0] - 2026-09-14
+
+- Support Nextcloud 35
+- Update PHP + NPM dependencies
+
 ## [2.0.0] - 2026-07-28
 
 - Support Nextcloud 28-34

@@ -17,7 +17,7 @@ test.describe('Personal settings', () => {
 		const settings = page.locator('#monthly-notifications-settings')
 		await expect(settings).toContainText('Monthly Status Email')
 
-		const toggle = settings.getByRole('checkbox', { name: 'Send status email' })
+		const toggle = settings.getByRole('switch', { name: 'Send status email' })
 		await expect(toggle).toBeChecked()
 		await toggle.click({ force: true })
 		await expect(toggle).not.toBeChecked()
