@@ -47,7 +47,7 @@
     "eslint": "^10.13.0",
     "vite": "^7.3.6",
     "vite-plugin-node-polyfills": "^0.28.0",
-    "vue-tsc": "^3.3.13"
+    "vue-tsc": "^3.3.14"
   },
   "allowScripts": {
     "core-js@3.49.0": true,
